@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Team Savings - CHHOR</title>
+    <style>
+        :root {
+            --primary: #0066ff;
+            --bg: #f2f4f7;
+            --card: #ffffff;
+            --text: #1a1a1a;
+            --gray: #8e8e93;
+        }
+
+        body {
+            margin: 0; padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            display: flex; justify-content: center;
+        }
+
+        .app-shell {
+            width: 100%; max-width: 450px;
+            min-height: 100vh;
+            background: var(--card);
+            display: flex; flex-direction: column;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        header {
+            background: var(--primary);
+            color: white; padding: 30px 20px;
+            border-radius: 0 0 25px 25px;
+            text-align: center;
+        }
+
+        header p { margin: 5px 0 0; font-size: 14px; opacity: 0.9; }
+
+        .container { padding: 20px; flex-grow: 1; }
+
+        /* Auth UI */
+        .auth-card { display: flex; flex-direction: column; gap: 12px; margin-top: 40px; }
+        input {
+            padding: 16px; border: 1px solid #ddd;
+            border-radius: 12px; font-size: 16px; outline: none;
+        }
+        input:focus { border-color: var(--primary); }
+
+        /* Dashboard UI */
+        .hidden { display: none !important; }
+        
+        .stats-row {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 15px; margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: #f8f9fa; padding: 15px;
+            border-radius: 15px; text-align: center;
+        }
+        .stat-card span { display: block; font-size: 12px; color: var(--gray); }
+        .stat-card b { font-size: 18px; color: var(--primary); }
+
+        .calendar-grid {
+            display: grid; grid-template-columns: repeat(6, 1fr);
+            gap: 8px; margin-bottom: 25px;
+        }
+
+        .day {
+            aspect-ratio: 1/1; display: flex;
+            align-items: center; justify-content: center;
+            background: #f0f0f0; border-radius: 12px;
+            font-weight: 600; cursor: pointer;
+            transition: 0.2s; font-size: 14px;
+        }
+
+        .day.selected {
+            background: var(--primary); color: white;
+            transform: scale(0.9); box-shadow: 0 4px 10px rgba(0,102,255,0.3);
+        }
+
+        /* Payment Box */
+        .payment-box {
+            text-align: center; padding: 20px;
+            border: 2px dashed var(--primary); border-radius: 20px;
+            background: #f0f7ff;
+        }
+
+        .qr-img { width: 200px; margin: 15px 0; border-radius: 15px; border: 4px solid white; }
+
+        .btn {
+            background: var(--primary); color: white;
+            border: none; padding: 16px; border-radius: 14px;
+            font-size: 16px; font-weight: bold; cursor: pointer;
+            width: 100%; transition: 0.3s;
+        }
+        .btn:active { transform: scale(0.98); opacity: 0.9; }
+
+        .btn-secondary { background: #eee; color: #333; margin-top: 10px; }
+        
+        .footer-info { margin-top: 20px; font-size: 12px; color: var(--gray); text-align: center; }
+    </style>
+</head>
+<body>
+
+<div class="app-shell">
+    <header>
+        <h2 style="margin:0;">Team Savings</h2>
+        <p id="user-display">Welcome Back</p>
+    </header>
+
+    <div class="container">
+        <div id="auth-view" class="auth-card">
+            <h3 style="text-align:center;">Member Sign In</h3>
+            <input type="email" id="email" placeholder="Email Address">
+            <input type="password" id="password" placeholder="Password">
+            <button class="btn" onclick="handleAuth('in')">Sign In</button>
+            <button class="btn btn-secondary" onclick="handleAuth('up')">Create Account</button>
+        </div>
+
+        <div id="dashboard-view" class="hidden">
+            <div class="stats-row">
+                <div class="stat-card">
+                    <span>Days Selected</span>
+                    <b id="count">0</b>
+                </div>
+                <div class="stat-card">
+                    <span>Amount Due</span>
+                    <b id="total">0</b>៛
+                </div>
+            </div>
+
+            <div class="calendar-grid" id="calendar"></div>
+
+            <div class="payment-box">
+                <p style="margin:0; font-weight:bold;">Scan ABA to Pay</p>
+                <img src="https://via.placeholder.com/200x200?text=ABA+KHQR" class="qr-img" id="qr-code">
+                <button class="btn" onclick="submitPayment()">Confirm I Paid</button>
+            </div>
+            
+            <button class="btn btn-secondary" onclick="signOutUser()" style="margin-top: 40px;">Log Out</button>
+            <p class="footer-info">Project by CHHOR • NPIC 2026</p>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    // YOUR ACTUAL CONFIG FROM SCREENSHOT
+    const firebaseConfig = {
+        apiKey: "AIzaSyOhkBEuy13iz40BclqRIsRfuij8CATHBK4",
+        authDomain: "saving-95739.firebaseapp.com",
+        projectId: "saving-95739",
+        storageBucket: "saving-95739.firebasestorage.app",
+        messagingSenderId: "628968611666",
+        appId: "1:628968611666:web:fd97c817716d59a574a48b",
+        measurementId: "G-ZM7MKHGVXN"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const authView = document.getElementById('auth-view');
+    const dashView = document.getElementById('dashboard-view');
+    const calendar = document.getElementById('calendar');
+
+    // Auth Actions
+    window.handleAuth = (type) => {
+        const email = document.getElementById('email').value;
+        const pass = document.getElementById('password').value;
+        if(!email || !pass) return alert("Please fill in all fields");
+
+        if (type === 'up') {
+            createUserWithEmailAndPassword(auth, email, pass)
+                .then(() => alert("Account Created!"))
+                .catch(e => alert(e.message));
+        } else {
+            signInWithEmailAndPassword(auth, email, pass)
+                .catch(e => alert("Login failed: " + e.message));
+        }
+    };
+
+    window.signOutUser = () => signOut(auth);
+
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            authView.classList.add('hidden');
+            dashView.classList.remove('hidden');
+            document.getElementById('user-display').innerText = user.email;
+            renderCalendar();
+        } else {
+            authView.classList.remove('hidden');
+            dashView.classList.add('hidden');
+        }
+    });
+
+    // Calendar logic
+    function renderCalendar() {
+        calendar.innerHTML = "";
+        for (let i = 1; i <= 30; i++) {
+            const dayDiv = document.createElement('div');
+            dayDiv.className = 'day';
+            dayDiv.innerText = i;
+            dayDiv.onclick = () => {
+                dayDiv.classList.toggle('selected');
+                updateTotals();
+            };
+            calendar.appendChild(dayDiv);
+        }
+    }
+
+    function updateTotals() {
+        const selected = document.querySelectorAll('.selected').length;
+        document.getElementById('count').innerText = selected;
+        document.getElementById('total').innerText = (selected * 1000).toLocaleString();
+    }
+
+    // Save to Firestore
+    window.submitPayment = async () => {
+        const count = document.querySelectorAll('.selected').length;
+        if (count === 0) return alert("Please select days first!");
+
+        try {
+            await addDoc(collection(db, "payments"), {
+                userEmail: auth.currentUser.email,
+                daysPaid: count,
+                amount: count * 1000,
+                status: "pending",
+                time: serverTimestamp()
+            });
+            alert("Success! Your payment record has been saved.");
+            // Reset UI
+            document.querySelectorAll('.selected').forEach(el => el.classList.remove('selected'));
+            updateTotals();
+        } catch (err) {
+            alert("Error saving: " + err.message);
+        }
+    };
+</script>
+
+</body>
+</html>
