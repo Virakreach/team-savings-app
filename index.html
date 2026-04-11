@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Team Savings - CHHOR</title>
     <style>
-        :root { --primary: #0066ff; --bg: #f2f4f7; --card: #ffffff; --text: #1a1a1a; --gray: #8e8e93; }
+        :root { --primary: #0066ff; --bg: #f2f4f7; --card: #ffffff; --text: #1a1a1a; --aba: #003e52; }
         body { margin: 0; padding: 0; font-family: -apple-system, sans-serif; background-color: var(--bg); display: flex; justify-content: center; }
         .app-shell { width: 100%; max-width: 450px; min-height: 100vh; background: var(--card); display: flex; flex-direction: column; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
         header { background: var(--primary); color: white; padding: 30px 20px; border-radius: 0 0 25px 25px; text-align: center; }
@@ -15,13 +15,15 @@
         .hidden { display: none !important; }
         .stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
         .stat-card { background: #f8f9fa; padding: 15px; border-radius: 15px; text-align: center; }
+        .stat-card b { color: var(--primary); font-size: 1.2rem; }
         .calendar-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-bottom: 25px; }
         .day { aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; background: #f0f0f0; border-radius: 12px; font-weight: 600; cursor: pointer; transition: 0.2s; font-size: 14px; }
         .day.selected { background: var(--primary); color: white; transform: scale(0.9); }
         .payment-box { text-align: center; padding: 20px; border: 2px dashed var(--primary); border-radius: 20px; background: #f0f7ff; }
-        .qr-img { width: 200px; margin: 15px 0; border-radius: 15px; border: 4px solid white; }
-        .btn { background: var(--primary); color: white; border: none; padding: 16px; border-radius: 14px; font-size: 16px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; }
-        .btn-secondary { background: #eee; color: #333; margin-top: 10px; }
+        .qr-img { width: 220px; margin: 15px 0; border-radius: 15px; border: 4px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .btn { background: var(--primary); color: white; border: none; padding: 16px; border-radius: 14px; font-size: 16px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; margin-top: 10px; }
+        .btn-aba { background: var(--aba); color: white; text-decoration: none; display: block; }
+        .btn-secondary { background: #eee; color: #333; margin-top: 20px; }
     </style>
 </head>
 <body>
@@ -29,7 +31,7 @@
 <div class="app-shell">
     <header>
         <h2 style="margin:0;">Team Savings</h2>
-        <p id="user-display">Connecting to Firebase...</p>
+        <p id="user-display">Connecting...</p>
     </header>
 
     <div class="container">
@@ -46,13 +48,22 @@
                 <div class="stat-card"><span>Days</span><br><b id="count">0</b></div>
                 <div class="stat-card"><span>Total</span><br><b id="total">0</b>៛</div>
             </div>
+
             <div class="calendar-grid" id="calendar"></div>
-            <div class="payment-box">
-                <p>Scan ABA to Pay</p>
-                <img src="https://via.placeholder.com/200x200?text=ABA+KHQR" class="qr-img">
-                <button class="btn" onclick="submitPayment()">Confirm I Paid</button>
+
+            <div id="payment-area" class="payment-box hidden">
+                <p style="margin:0; font-weight:bold;">Paying for <span id="label-amt">0</span>៛</p>
+                
+                <img src="" class="qr-img" id="dynamic-qr">
+
+                <a id="aba-app-link" href="#" target="_blank" style="text-decoration:none;">
+                    <button class="btn btn-aba">Tap to Pay in ABA App</button>
+                </a>
+
+                <button class="btn" onclick="submitPayment()">I have sent the money</button>
             </div>
-            <button class="btn btn-secondary" onclick="signOutUser()" style="margin-top: 30px;">Log Out</button>
+            
+            <button class="btn btn-secondary" onclick="signOutUser()">Log Out</button>
         </div>
     </div>
 </div>
@@ -62,7 +73,6 @@
     import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
     import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    // FIXED CONFIG FROM YOUR SCREENSHOT
     const firebaseConfig = {
         apiKey: "AIzaSyDhkBEuYi3iz4OBclqRIsRrfuij8CATBK4",
         authDomain: "saving-95739.firebaseapp.com",
@@ -73,69 +83,92 @@
         measurementId: "G-ZM7MKHGVXN"
     };
 
-    try {
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+    // YOUR ACTUAL ABA LINKS APPLIED
+    const qrData = {
+        1: "https://pay.ababank.com/oRF8/u5365ae0", 
+        2: "https://pay.ababank.com/oRF8/qfhq896b",
+        3: "https://pay.ababank.com/oRF8/1chyxf7l",
+        4: "https://pay.ababank.com/oRF8/xdle8p4z",
+        5: "https://pay.ababank.com/oRF8/uxifpikk",
+        6: "https://pay.ababank.com/oRF8/8ftyaedt",
+        7: "https://pay.ababank.com/oRF8/f7goqo7c",
+        8: "https://pay.ababank.com/oRF8/s4l5uasf",
+        9: "https://pay.ababank.com/oRF8/av6lypgj",
+        10: "https://pay.ababank.com/oRF8/w1ehwjpl"
+    };
 
-        // UI Functions
-        window.handleAuth = (type) => {
-            const email = document.getElementById('email').value;
-            const pass = document.getElementById('password').value;
-            if (type === 'up') {
-                createUserWithEmailAndPassword(auth, email, pass).catch(e => alert(e.message));
-            } else {
-                signInWithEmailAndPassword(auth, email, pass).catch(e => alert(e.message));
-            }
-        };
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-        window.signOutUser = () => signOut(auth);
-
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                document.getElementById('auth-view').classList.add('hidden');
-                document.getElementById('dashboard-view').classList.remove('hidden');
-                document.getElementById('user-display').innerText = user.email;
-                renderCalendar();
-            } else {
-                document.getElementById('auth-view').classList.remove('hidden');
-                document.getElementById('dashboard-view').classList.add('hidden');
-                document.getElementById('user-display').innerText = "Please Sign In";
-            }
-        });
-
-        function renderCalendar() {
-            const cal = document.getElementById('calendar');
-            cal.innerHTML = "";
-            for (let i = 1; i <= 30; i++) {
-                const d = document.createElement('div');
-                d.className = 'day'; d.innerText = i;
-                d.onclick = () => { d.classList.toggle('selected'); updateTotals(); };
-                cal.appendChild(d);
-            }
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            document.getElementById('auth-view').classList.add('hidden');
+            document.getElementById('dashboard-view').classList.remove('hidden');
+            document.getElementById('user-display').innerText = user.email;
+            renderCalendar();
+        } else {
+            document.getElementById('auth-view').classList.remove('hidden');
+            document.getElementById('dashboard-view').classList.add('hidden');
+            document.getElementById('user-display').innerText = "Please Sign In";
         }
+    });
 
-        function updateTotals() {
-            const s = document.querySelectorAll('.selected').length;
-            document.getElementById('count').innerText = s;
-            document.getElementById('total').innerText = (s * 1000).toLocaleString();
+    window.handleAuth = (type) => {
+        const e = document.getElementById('email').value;
+        const p = document.getElementById('password').value;
+        if(type === 'up') createUserWithEmailAndPassword(auth, e, p).catch(err => alert(err.message));
+        else signInWithEmailAndPassword(auth, e, p).catch(err => alert(err.message));
+    };
+
+    window.signOutUser = () => signOut(auth);
+
+    function renderCalendar() {
+        const cal = document.getElementById('calendar');
+        cal.innerHTML = "";
+        for (let i = 1; i <= 30; i++) {
+            const d = document.createElement('div');
+            d.className = 'day'; d.innerText = i;
+            d.onclick = () => { d.classList.toggle('selected'); updateUI(); };
+            cal.appendChild(d);
         }
+    }
 
-        window.submitPayment = async () => {
-            const s = document.querySelectorAll('.selected').length;
-            if (s === 0) return alert("Select days first!");
+    function updateUI() {
+        const s = document.querySelectorAll('.selected').length;
+        document.getElementById('count').innerText = s;
+        document.getElementById('total').innerText = (s * 1000).toLocaleString();
+        
+        const payArea = document.getElementById('payment-area');
+        const qrImg = document.getElementById('dynamic-qr');
+        const abaLink = document.getElementById('aba-app-link');
+        const labelAmt = document.getElementById('label-amt');
+
+        if (s > 0 && s <= 10) {
+            payArea.classList.remove('hidden');
+            labelAmt.innerText = (s * 1000).toLocaleString();
+            qrImg.src = `ABA-QR/${s}.jpg`; // Folder/filename.jpg
+            abaLink.href = qrData[s];
+        } else {
+            payArea.classList.add('hidden');
+        }
+    }
+
+    window.submitPayment = async () => {
+        const s = document.querySelectorAll('.selected').length;
+        try {
             await addDoc(collection(db, "payments"), {
                 user: auth.currentUser.email,
                 amount: s * 1000,
+                days: s,
                 status: "pending",
-                date: serverTimestamp()
+                time: serverTimestamp()
             });
-            alert("Payment Saved!");
-        };
-    } catch (err) {
-        document.getElementById('user-display').innerText = "Config Error!";
-        console.error(err);
-    }
+            alert("Payment recorded! Wait for verification.");
+            document.querySelectorAll('.selected').forEach(el => el.classList.remove('selected'));
+            updateUI();
+        } catch (e) { alert(e.message); }
+    };
 </script>
 </body>
 </html>
