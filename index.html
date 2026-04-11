@@ -3,36 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Team Savings - Pro</title>
+    <title>Team Savings - NPIC Pro</title>
     <style>
-        :root { --primary: #0066ff; --bg: #f2f4f7; --card: #ffffff; --text: #1a1a1a; --aba: #003e52; --paid: #3a3a3a; }
+        :root { --primary: #0066ff; --bg: #f2f4f7; --card: #ffffff; --text: #1a1a1a; --aba: #003e52; --paid: #3a3a3a; --gold: #FFD700; }
         body { margin: 0; padding: 0; font-family: -apple-system, sans-serif; background-color: var(--bg); display: flex; justify-content: center; }
         .app-shell { width: 100%; max-width: 450px; min-height: 100vh; background: var(--card); display: flex; flex-direction: column; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
         header { background: var(--primary); color: white; padding: 30px 20px; border-radius: 0 0 25px 25px; text-align: center; }
         .container { padding: 20px; flex-grow: 1; }
+        
+        /* Auth & Layout */
         .auth-card { display: flex; flex-direction: column; gap: 12px; margin-top: 40px; }
         input { padding: 16px; border: 1px solid #ddd; border-radius: 12px; font-size: 16px; outline: none; }
         .hidden { display: none !important; }
         
-        /* Stats and Calendar */
+        /* Stats & Calendar */
         .stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
         .stat-card { background: #f8f9fa; padding: 15px; border-radius: 15px; text-align: center; }
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-bottom: 25px; }
-        .calendar-header { grid-column: 1 / span 7; text-align: left; font-weight: bold; padding-bottom: 10px; color: var(--primary); }
+        .calendar-header { grid-column: 1 / span 7; text-align: left; font-weight: bold; padding: 10px 0; color: var(--primary); border-bottom: 1px solid #eee; margin-bottom: 10px; }
         
-        /* Day States */
+        /* Day Styles */
         .day { aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; background: #f0f0f0; border-radius: 12px; font-weight: 600; cursor: pointer; transition: 0.2s; font-size: 14px; position: relative; }
         .day.selected { background: var(--primary); color: white; transform: scale(0.9); }
-        
-        /* PAID / DARK STATE */
         .day.paid { background: var(--paid) !important; color: #888 !important; cursor: not-allowed; opacity: 0.7; }
         .day.paid::after { content: "✓"; position: absolute; bottom: 2px; font-size: 10px; color: #4cd964; }
 
-        .payment-box { text-align: center; padding: 20px; border: 2px dashed var(--primary); border-radius: 20px; background: #f0f7ff; margin-bottom: 20px; }
+        /* Payment UI */
+        .payment-box { text-align: center; padding: 20px; border: 2px dashed var(--primary); border-radius: 20px; background: #f0f7ff; margin-bottom: 25px; }
         .qr-img { width: 220px; margin: 15px 0; border-radius: 15px; border: 4px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         .btn { background: var(--primary); color: white; border: none; padding: 16px; border-radius: 14px; font-size: 16px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; margin-top: 10px; }
         .btn-aba { background: var(--aba); }
         .btn-secondary { background: #eee; color: #333; margin-top: 20px; }
+
+        /* Leaderboard */
+        .leaderboard { margin-top: 30px; background: #fff; padding: 15px; border-radius: 20px; border: 1px solid #eee; }
+        .leader-row { display: flex; justify-content: space-between; padding: 12px 5px; border-bottom: 1px solid #f9f9f9; align-items: center; }
+        .rank { width: 25px; height: 25px; background: #eee; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; margin-right: 10px; }
+        .top1 { color: var(--gold); font-weight: bold; }
+
+        /* Admin Section */
+        .admin-panel { background: #fff3cd; padding: 15px; border-radius: 15px; margin-top: 30px; border: 1px solid #ffeeba; font-size: 13px; }
     </style>
 </head>
 <body>
@@ -54,19 +64,29 @@
 
         <div id="dashboard-view" class="hidden">
             <div class="stats-row">
-                <div class="stat-card"><span>Days Selected</span><br><b id="count" style="color:var(--primary)">0</b></div>
-                <div class="stat-card"><span>Total Riel</span><br><b id="total" style="color:var(--primary)">0</b>៛</div>
+                <div class="stat-card"><span>Days</span><br><b id="count">0</b></div>
+                <div class="stat-card"><span>Total</span><br><b id="total">0</b>៛</div>
             </div>
 
             <div class="calendar-grid" id="calendar"></div>
 
             <div id="payment-area" class="payment-box hidden">
-                <p style="margin:0; font-weight:bold;">Paying for <span id="label-amt">0</span>៛</p>
+                <p style="margin:0; font-weight:bold;">Pay <span id="label-amt">0</span>៛</p>
                 <img src="" class="qr-img" id="dynamic-qr">
                 <a id="aba-app-link" href="#" target="_blank" style="text-decoration:none;">
                     <button class="btn btn-aba">Tap to Pay in ABA App</button>
                 </a>
                 <button class="btn" onclick="submitPayment()">I have sent the money</button>
+            </div>
+
+            <div class="leaderboard">
+                <h3 style="margin:0 0 15px 0; font-size: 18px;">Top Savers 🏆</h3>
+                <div id="leader-list">Loading rankings...</div>
+            </div>
+
+            <div id="admin-panel" class="admin-panel hidden">
+                <h4 style="margin:0 0 10px 0;">Admin: Member Activity</h4>
+                <div id="all-payments-list"></div>
             </div>
             
             <button class="btn btn-secondary" onclick="signOutUser()">Log Out</button>
@@ -77,7 +97,7 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, collection, addDoc, getDocs, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, query, where, serverTimestamp, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyDhkBEuYi3iz4OBclqRIsRrfuij8CATBK4",
@@ -106,18 +126,26 @@
             document.getElementById('auth-view').classList.add('hidden');
             document.getElementById('dashboard-view').classList.remove('hidden');
             document.getElementById('user-display').innerText = user.email;
+            
+            // Check if Admin
+            if (user.email === "boylovecar44@gmail.com") {
+                document.getElementById('admin-panel').classList.remove('hidden');
+                loadAdminData();
+            }
+            
             renderCalendar();
+            updateLeaderboard();
         } else {
             document.getElementById('auth-view').classList.remove('hidden');
             document.getElementById('dashboard-view').classList.add('hidden');
         }
     });
 
-    window.handleAuth = (type) => {
+    window.handleAuth = (t) => {
         const e = document.getElementById('email').value;
         const p = document.getElementById('password').value;
-        if(type === 'up') createUserWithEmailAndPassword(auth, e, p).catch(err => alert(err.message));
-        else signInWithEmailAndPassword(auth, e, p).catch(err => alert(err.message));
+        if(t === 'up') createUserWithEmailAndPassword(auth, e, p).catch(a => alert(a.message));
+        else signInWithEmailAndPassword(auth, e, p).catch(a => alert(a.message));
     };
 
     window.signOutUser = () => signOut(auth);
@@ -125,47 +153,31 @@
     async function renderCalendar() {
         const cal = document.getElementById('calendar');
         cal.innerHTML = "";
-
-        // Get current month details
         const now = new Date();
         const year = now.getFullYear();
         const month = now.getMonth();
-        const monthName = now.toLocaleString('default', { month: 'long' });
         const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-        // Add Month Header
         const header = document.createElement('div');
         header.className = 'calendar-header';
-        header.innerText = `${monthName} ${year}`;
+        header.innerText = now.toLocaleString('default', { month: 'long' }) + " " + year;
         cal.appendChild(header);
 
-        // Fetch paid days from Firebase
+        // Fetch paid days
         const paidDays = new Set();
-        try {
-            const q = query(collection(db, "payments"), where("user", "==", auth.currentUser.email));
-            const snapshot = await getDocs(q);
-            snapshot.forEach(doc => {
-                const data = doc.data();
-                if (Array.isArray(data.selectedDays)) {
-                    data.selectedDays.forEach(day => paidDays.add(day));
-                }
-            });
-        } catch (e) { console.error("Error loading history:", e); }
+        const q = query(collection(db, "payments"), where("user", "==", auth.currentUser.email));
+        const snap = await getDocs(q);
+        snap.forEach(doc => {
+            const days = doc.data().selectedDays;
+            if (days) days.forEach(d => paidDays.add(d));
+        });
 
-        // Create Days
         for (let i = 1; i <= daysInMonth; i++) {
             const d = document.createElement('div');
             d.className = 'day';
             d.innerText = i;
-
-            if (paidDays.has(i)) {
-                d.classList.add('paid');
-            } else {
-                d.onclick = () => {
-                    d.classList.toggle('selected');
-                    updateUI();
-                };
-            }
+            if (paidDays.has(i)) d.classList.add('paid');
+            else d.onclick = () => { d.classList.toggle('selected'); updateUI(); };
             cal.appendChild(d);
         }
     }
@@ -174,40 +186,59 @@
         const s = document.querySelectorAll('.day.selected').length;
         document.getElementById('count').innerText = s;
         document.getElementById('total').innerText = (s * 1000).toLocaleString();
-        
         const payArea = document.getElementById('payment-area');
-        const qrImg = document.getElementById('dynamic-qr');
-        const abaLink = document.getElementById('aba-app-link');
-        const labelAmt = document.getElementById('label-amt');
-
         if (s > 0 && s <= 10) {
             payArea.classList.remove('hidden');
-            labelAmt.innerText = (s * 1000).toLocaleString();
-            qrImg.src = `ABA-QR/${s}.jpg`; 
-            abaLink.href = qrData[s];
-        } else {
-            payArea.classList.add('hidden');
-        }
+            document.getElementById('label-amt').innerText = (s * 1000).toLocaleString();
+            document.getElementById('dynamic-qr').src = `ABA-QR/${s}.jpg`;
+            document.getElementById('aba-app-link').href = qrData[s];
+        } else { payArea.classList.add('hidden'); }
+    }
+
+    async function updateLeaderboard() {
+        const snap = await getDocs(collection(db, "payments"));
+        const scores = {};
+        snap.forEach(doc => {
+            const d = doc.data();
+            scores[d.user] = (scores[d.user] || 0) + d.amount;
+        });
+        const sorted = Object.entries(scores).sort((a,b) => b[1] - a[1]);
+        document.getElementById('leader-list').innerHTML = sorted.map(([u, amt], i) => `
+            <div class="leader-row">
+                <div style="display:flex; align-items:center;">
+                    <div class="rank ${i===0?'top1':''}">${i+1}</div>
+                    <span>${u.split('@')[0]}</span>
+                </div>
+                <b>${amt.toLocaleString()}៛</b>
+            </div>
+        `).join('');
+    }
+
+    async function loadAdminData() {
+        const q = query(collection(db, "payments"), orderBy("timestamp", "desc"));
+        const snap = await getDocs(q);
+        document.getElementById('all-payments-list').innerHTML = snap.docs.map(doc => {
+            const d = doc.data();
+            return `<div style="padding:5px 0; border-bottom:1px solid #ddd;">
+                <b>${d.user.split('@')[0]}</b> sent ${d.amount}៛ for days ${d.selectedDays}
+            </div>`;
+        }).join('');
     }
 
     window.submitPayment = async () => {
-        const selectedNodes = document.querySelectorAll('.day.selected');
-        const selectedDays = Array.from(selectedNodes).map(n => parseInt(n.innerText));
-        
-        if (selectedDays.length === 0) return;
-
+        const sel = document.querySelectorAll('.day.selected');
+        const days = Array.from(sel).map(n => parseInt(n.innerText));
+        if (days.length === 0) return;
         try {
             await addDoc(collection(db, "payments"), {
                 user: auth.currentUser.email,
-                amount: selectedDays.length * 1000,
-                selectedDays: selectedDays,
-                status: "pending",
+                amount: days.length * 1000,
+                selectedDays: days,
                 timestamp: serverTimestamp()
             });
-            alert("Payment Sent! Once verified, these days will be locked.");
-            renderCalendar(); // Refresh UI
-            updateUI();
-        } catch (e) { alert("Error saving: " + e.message); }
+            alert("Sent! Your calendar will update.");
+            renderCalendar(); updateUI(); updateLeaderboard();
+        } catch (e) { alert(e.message); }
     };
 </script>
 </body>
