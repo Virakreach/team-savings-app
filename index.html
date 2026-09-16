@@ -5,90 +5,218 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Team Savings - CHHOR family</title>
     <style>
-        :root { --primary: #0066ff; --bg: #f2f4f7; --card: #ffffff; --text: #1a1a1a; --aba: #003e52; --paid: #3a3a3a; --gold: #FFD700; }
-        body { margin: 0; padding: 0; font-family: -apple-system, sans-serif; background-color: var(--bg); display: flex; justify-content: center; }
-        .app-shell { width: 100%; max-width: 450px; min-height: 100vh; background: var(--card); display: flex; flex-direction: column; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
-        header { background: var(--primary); color: white; padding: 30px 20px; border-radius: 0 0 25px 25px; text-align: center; }
+        :root { 
+            --primary: #0066ff; 
+            --bg: #f2f4f7; 
+            --card: #ffffff; 
+            --text: #1a1a1a; 
+            --aba: #003e52; 
+            --paid: #3a3a3a; 
+            --gold: #FFD700; 
+        }
+        body { 
+            margin: 0; 
+            padding: 0; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            background-color: var(--bg); 
+            display: flex; 
+            justify-content: center; 
+        }
+        .app-shell { 
+            width: 100%; 
+            max-width: 450px; 
+            min-height: 100vh; 
+            background: var(--card); 
+            display: flex; 
+            flex-direction: column; 
+            box-shadow: 0 0 20px rgba(0,0,0,0.1); 
+        }
+        header { 
+            background: var(--primary); 
+            color: white; 
+            padding: 24px 20px; 
+            border-radius: 0 0 25px 25px; 
+            text-align: center; 
+        }
+        .clock-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            margin-top: 8px;
+        }
         .container { padding: 20px; flex-grow: 1; }
         
-        /* Auth & Layout */
+        /* Auth */
         .auth-card { display: flex; flex-direction: column; gap: 12px; margin-top: 40px; }
         input { padding: 16px; border: 1px solid #ddd; border-radius: 12px; font-size: 16px; outline: none; }
         .hidden { display: none !important; }
         
-        /* Stats & Calendar */
+        /* Stats */
         .stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
         .stat-card { background: #f8f9fa; padding: 15px; border-radius: 15px; text-align: center; }
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-bottom: 25px; }
-        .calendar-header { grid-column: 1 / span 7; text-align: left; font-weight: bold; padding: 10px 0; color: var(--primary); border-bottom: 1px solid #eee; margin-bottom: 10px; }
+
+        /* Month Selector Bar */
+        .month-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #f8f9fa;
+            border-radius: 14px;
+            padding: 8px 12px;
+            margin-bottom: 15px;
+        }
+        .month-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            width: 36px;
+            height: 36px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+        }
+        .month-btn:active { transform: scale(0.92); }
+        .month-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--primary);
+        }
         
-        /* Day Styles */
-        .day { aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; background: #f0f0f0; border-radius: 12px; font-weight: 600; cursor: pointer; transition: 0.2s; font-size: 14px; position: relative; }
-        .day.selected { background: var(--primary); color: white; transform: scale(0.9); }
-        .day.paid { background: var(--paid) !important; color: #888 !important; cursor: not-allowed; opacity: 0.7; }
-        .day.paid::after { content: "✓"; position: absolute; bottom: 2px; font-size: 10px; color: #4cd964; }
+        /* Calendar Grid */
+        .calendar-grid { 
+            display: grid; 
+            grid-template-columns: repeat(7, 1fr); 
+            gap: 8px; 
+            margin-bottom: 25px; 
+        }
+        .day { 
+            aspect-ratio: 1/1; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            background: #f0f0f0; 
+            border-radius: 12px; 
+            font-weight: 600; 
+            cursor: pointer; 
+            transition: 0.2s; 
+            font-size: 14px; 
+            position: relative; 
+            user-select: none;
+        }
+        .day.selected { background: var(--primary); color: white; transform: scale(0.92); }
+        .day.paid { background: var(--paid) !important; color: #888 !important; cursor: not-allowed; opacity: 0.65; }
+        .day.paid::after { content: "✓"; position: absolute; bottom: 2px; font-size: 11px; color: #4cd964; }
 
         /* Payment UI */
-        .payment-box { text-align: center; padding: 20px; border: 2px dashed var(--primary); border-radius: 20px; background: #f0f7ff; margin-bottom: 25px; }
-        .qr-img { width: 220px; margin: 15px 0; border-radius: 15px; border: 4px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .btn { background: var(--primary); color: white; border: none; padding: 16px; border-radius: 14px; font-size: 16px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; margin-top: 10px; }
+        .payment-box { 
+            text-align: center; 
+            padding: 20px; 
+            border: 2px dashed var(--primary); 
+            border-radius: 20px; 
+            background: #f0f7ff; 
+            margin-bottom: 25px; 
+        }
+        .qr-img { 
+            width: 220px; 
+            height: auto;
+            margin: 15px 0; 
+            border-radius: 15px; 
+            border: 4px solid white; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
+        }
+        .btn { 
+            background: var(--primary); 
+            color: white; 
+            border: none; 
+            padding: 16px; 
+            border-radius: 14px; 
+            font-size: 16px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            width: 100%; 
+            transition: 0.2s; 
+            margin-top: 10px; 
+        }
+        .btn:active { transform: scale(0.98); }
         .btn-aba { background: var(--aba); }
-        .btn-secondary { background: #eee; color: #333; margin-top: 20px; }
+        .btn-secondary { background: #eee; color: #333; margin-top: 15px; }
 
         /* Leaderboard */
-        .leaderboard { margin-top: 30px; background: #fff; padding: 15px; border-radius: 20px; border: 1px solid #eee; }
+        .leaderboard { margin-top: 25px; background: #fff; padding: 15px; border-radius: 20px; border: 1px solid #eee; }
         .leader-row { display: flex; justify-content: space-between; padding: 12px 5px; border-bottom: 1px solid #f9f9f9; align-items: center; }
         .rank { width: 25px; height: 25px; background: #eee; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; margin-right: 10px; }
         .top1 { color: var(--gold); font-weight: bold; }
 
         /* Admin Section */
-        .admin-panel { background: #fff3cd; padding: 15px; border-radius: 15px; margin-top: 30px; border: 1px solid #ffeeba; font-size: 13px; }
+        .admin-panel { background: #fff3cd; padding: 15px; border-radius: 15px; margin-top: 25px; border: 1px solid #ffeeba; font-size: 13px; }
     </style>
 </head>
 <body>
 
 <div class="app-shell">
     <header>
-        <h2 style="margin:0;">Team Savings</h2>
-        <p id="user-display">Connecting...</p>
+        <h2 style="margin:0; font-size: 22px;">Team Savings</h2>
+        <div id="live-clock" class="clock-badge">--:--:-- --</div>
+        <p id="user-display" style="margin: 8px 0 0; font-size: 14px; opacity: 0.9;">Connecting...</p>
     </header>
 
     <div class="container">
+        <!-- Auth View -->
         <div id="auth-view" class="auth-card">
-            <h3 style="text-align:center;">Member Sign In</h3>
+            <h3 style="text-align:center; margin-top:0;">Member Sign In</h3>
             <input type="email" id="email" placeholder="Email Address">
             <input type="password" id="password" placeholder="Password">
             <button class="btn" onclick="handleAuth('in')">Sign In</button>
             <button class="btn btn-secondary" onclick="handleAuth('up')">Create Account</button>
         </div>
 
+        <!-- Dashboard View -->
         <div id="dashboard-view" class="hidden">
             <div class="stats-row">
-                <div class="stat-card"><span>Days</span><br><b id="count">0</b></div>
-                <div class="stat-card"><span>Total</span><br><b id="total">0</b>៛</div>
+                <div class="stat-card"><span>Days Selected</span><br><b id="count">0</b></div>
+                <div class="stat-card"><span>Total Amount</span><br><b id="total">0</b>៛</div>
+            </div>
+
+            <!-- Month Controls -->
+            <div class="month-bar">
+                <button class="month-btn" onclick="changeMonth(-1)">&#8592;</button>
+                <span class="month-title" id="month-title">Month Year</span>
+                <button class="month-btn" onclick="changeMonth(1)">&#8594;</button>
             </div>
 
             <div class="calendar-grid" id="calendar"></div>
 
+            <!-- Payment Box -->
             <div id="payment-area" class="payment-box hidden">
-                <p style="margin:0; font-weight:bold;">Pay <span id="label-amt">0</span>៛</p>
-                <img src="" class="qr-img" id="dynamic-qr">
-                <a id="aba-app-link" href="#" target="_blank" style="text-decoration:none;">
+                <p style="margin:0; font-weight:bold; font-size: 17px;">Pay <span id="label-amt">0</span>៛</p>
+                <img src="" class="qr-img" id="dynamic-qr" alt="ABA QR Code">
+                <a id="aba-app-link" href="#" target="_blank" style="text-decoration:none; width: 100%;">
                     <button class="btn btn-aba">Tap to Pay in ABA App</button>
                 </a>
                 <button class="btn" onclick="submitPayment()">I have sent the money</button>
             </div>
 
+            <!-- Leaderboard -->
             <div class="leaderboard">
                 <h3 style="margin:0 0 15px 0; font-size: 18px;">Top Savers 🏆</h3>
                 <div id="leader-list">Loading rankings...</div>
             </div>
 
+            <!-- Admin Section -->
             <div id="admin-panel" class="admin-panel hidden">
-                <h4 style="margin:0 0 10px 0;">Admin: Member Activity</h4>
+                <h4 style="margin:0 0 10px 0;">Admin: Recent Submissions</h4>
                 <div id="all-payments-list"></div>
             </div>
-            
+
             <button class="btn btn-secondary" onclick="signOutUser()">Log Out</button>
         </div>
     </div>
@@ -109,30 +237,63 @@
         measurementId: "G-ZM7MKHGVXN"
     };
 
+    // Replace with your Google Apps Script Web App URL if logging to Sheets
+    const GOOGLE_SHEET_WEBHOOK_URL = "";
+
+    // 31 Days of ABA Deep Links
     const qrData = {
-        1: "https://pay.ababank.com/oRF8/u5365ae0", 2: "https://pay.ababank.com/oRF8/qfhq896b",
-        3: "https://pay.ababank.com/oRF8/1chyxf7l", 4: "https://pay.ababank.com/oRF8/xdle8p4z",
-        5: "https://pay.ababank.com/oRF8/uxifpikk", 6: "https://pay.ababank.com/oRF8/8ftyaedt",
-        7: "https://pay.ababank.com/oRF8/f7goqo7c", 8: "https://pay.ababank.com/oRF8/s4l5uasf",
-        9: "https://pay.ababank.com/oRF8/av6lypgj", 10: "https://pay.ababank.com/oRF8/w1ehwjpl"
+        1: "https://pay.ababank.com/oRF8/u5365ae0",
+        2: "https://pay.ababank.com/oRF8/qfhq896b",
+        3: "https://pay.ababank.com/oRF8/1chyxf7l",
+        4: "https://pay.ababank.com/oRF8/xdle8p4z",
+        5: "https://pay.ababank.com/oRF8/uxifpikk",
+        6: "https://pay.ababank.com/oRF8/8ftyaedt",
+        7: "https://pay.ababank.com/oRF8/f7goqo7c",
+        8: "https://pay.ababank.com/oRF8/s4l5uasf",
+        9: "https://pay.ababank.com/oRF8/av6lypgj",
+        10: "https://pay.ababank.com/oRF8/w1ehwjpl",
+        11: "#", 12: "#", 13: "#", 14: "#", 15: "#",
+        16: "#", 17: "#", 18: "#", 19: "#", 20: "#",
+        21: "#", 22: "#", 23: "#", 24: "#", 25: "#",
+        26: "#", 27: "#", 28: "#", 29: "#", 30: "#", 31: "#"
     };
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
 
+    // Active calendar browsing state
+    let currentDate = new Date();
+
+    // 1. Live Clock
+    function updateClock() {
+        const now = new Date();
+        const options = { 
+            weekday: 'short', 
+            month: 'short', 
+            day: 'numeric', 
+            hour: '2-digit', 
+            minute: '2-digit', 
+            second: '2-digit', 
+            hour12: true 
+        };
+        document.getElementById('live-clock').innerText = now.toLocaleString('en-US', options);
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // 2. Auth State
     onAuthStateChanged(auth, (user) => {
         if (user) {
             document.getElementById('auth-view').classList.add('hidden');
             document.getElementById('dashboard-view').classList.remove('hidden');
             document.getElementById('user-display').innerText = user.email;
-            
-            // Check if Admin
+
             if (user.email === "boylovecar44@gmail.com") {
                 document.getElementById('admin-panel').classList.remove('hidden');
                 loadAdminData();
             }
-            
+
             renderCalendar();
             updateLeaderboard();
         } else {
@@ -141,105 +302,170 @@
         }
     });
 
-    window.handleAuth = (t) => {
-        const e = document.getElementById('email').value;
-        const p = document.getElementById('password').value;
-        if(t === 'up') createUserWithEmailAndPassword(auth, e, p).catch(a => alert(a.message));
-        else signInWithEmailAndPassword(auth, e, p).catch(a => alert(a.message));
+    window.handleAuth = (type) => {
+        const email = document.getElementById('email').value;
+        const pass = document.getElementById('password').value;
+        if (type === 'up') createUserWithEmailAndPassword(auth, email, pass).catch(err => alert(err.message));
+        else signInWithEmailAndPassword(auth, email, pass).catch(err => alert(err.message));
     };
 
     window.signOutUser = () => signOut(auth);
 
+    // 3. Month Navigation
+    window.changeMonth = (direction) => {
+        currentDate.setMonth(currentDate.getMonth() + direction);
+        renderCalendar();
+    };
+
+    // 4. Calendar Engine
     async function renderCalendar() {
         const cal = document.getElementById('calendar');
         cal.innerHTML = "";
-        const now = new Date();
-        const year = now.getFullYear();
-        const month = now.getMonth();
+
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
+        const monthKey = `${year}-${String(month + 1).padStart(2, '0')}`;
         const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-        const header = document.createElement('div');
-        header.className = 'calendar-header';
-        header.innerText = now.toLocaleString('default', { month: 'long' }) + " " + year;
-        cal.appendChild(header);
+        document.getElementById('month-title').innerText = currentDate.toLocaleString('default', { month: 'long', year: 'numeric' });
 
-        // Fetch paid days
+        // Retrieve paid days for this month
         const paidDays = new Set();
-        const q = query(collection(db, "payments"), where("user", "==", auth.currentUser.email));
-        const snap = await getDocs(q);
-        snap.forEach(doc => {
-            const days = doc.data().selectedDays;
-            if (days) days.forEach(d => paidDays.add(d));
-        });
+        try {
+            const q = query(collection(db, "payments"), where("user", "==", auth.currentUser.email));
+            const snap = await getDocs(q);
+            snap.forEach(doc => {
+                const data = doc.data();
+                if (data.monthKey === monthKey && data.selectedDays) {
+                    data.selectedDays.forEach(d => paidDays.add(d));
+                }
+            });
+        } catch (e) {
+            console.error("Error reading paid days:", e);
+        }
 
         for (let i = 1; i <= daysInMonth; i++) {
             const d = document.createElement('div');
             d.className = 'day';
             d.innerText = i;
-            if (paidDays.has(i)) d.classList.add('paid');
-            else d.onclick = () => { d.classList.toggle('selected'); updateUI(); };
+            if (paidDays.has(i)) {
+                d.classList.add('paid');
+            } else {
+                d.onclick = () => { 
+                    d.classList.toggle('selected'); 
+                    updateUI(); 
+                };
+            }
             cal.appendChild(d);
         }
+        updateUI();
     }
 
+    // 5. Payment UI Engine
     function updateUI() {
         const s = document.querySelectorAll('.day.selected').length;
         document.getElementById('count').innerText = s;
         document.getElementById('total').innerText = (s * 1000).toLocaleString();
+        
         const payArea = document.getElementById('payment-area');
-        if (s > 0 && s <= 10) {
+        const qrImg = document.getElementById('dynamic-qr');
+
+        if (s > 0 && s <= 31) {
             payArea.classList.remove('hidden');
             document.getElementById('label-amt').innerText = (s * 1000).toLocaleString();
-            document.getElementById('dynamic-qr').src = `ABA-QR/${s}.jpg`;
-            document.getElementById('aba-app-link').href = qrData[s];
-        } else { payArea.classList.add('hidden'); }
+            
+            // Handles both repository root or ABA-QR folder
+            qrImg.src = `${s}.jpg`;
+            qrImg.onerror = () => { qrImg.src = `ABA-QR/${s}.jpg`; };
+
+            document.getElementById('aba-app-link').href = qrData[s] || "#";
+        } else {
+            payArea.classList.add('hidden');
+        }
     }
 
-    async function updateLeaderboard() {
-        const snap = await getDocs(collection(db, "payments"));
-        const scores = {};
-        snap.forEach(doc => {
-            const d = doc.data();
-            scores[d.user] = (scores[d.user] || 0) + d.amount;
-        });
-        const sorted = Object.entries(scores).sort((a,b) => b[1] - a[1]);
-        document.getElementById('leader-list').innerHTML = sorted.map(([u, amt], i) => `
-            <div class="leader-row">
-                <div style="display:flex; align-items:center;">
-                    <div class="rank ${i===0?'top1':''}">${i+1}</div>
-                    <span>${u.split('@')[0]}</span>
-                </div>
-                <b>${amt.toLocaleString()}៛</b>
-            </div>
-        `).join('');
-    }
-
-    async function loadAdminData() {
-        const q = query(collection(db, "payments"), orderBy("timestamp", "desc"));
-        const snap = await getDocs(q);
-        document.getElementById('all-payments-list').innerHTML = snap.docs.map(doc => {
-            const d = doc.data();
-            return `<div style="padding:5px 0; border-bottom:1px solid #ddd;">
-                <b>${d.user.split('@')[0]}</b> sent ${d.amount}៛ for days ${d.selectedDays}
-            </div>`;
-        }).join('');
-    }
-
+    // 6. Submit Payment
     window.submitPayment = async () => {
         const sel = document.querySelectorAll('.day.selected');
         const days = Array.from(sel).map(n => parseInt(n.innerText));
         if (days.length === 0) return;
+
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
+        const monthKey = `${year}-${String(month + 1).padStart(2, '0')}`;
+        const totalAmount = days.length * 1000;
+
         try {
+            // Save to Firestore with Month Tracking
             await addDoc(collection(db, "payments"), {
                 user: auth.currentUser.email,
-                amount: days.length * 1000,
+                amount: totalAmount,
                 selectedDays: days,
+                monthKey: monthKey,
                 timestamp: serverTimestamp()
             });
-            alert("Sent! Your calendar will update.");
-            renderCalendar(); updateUI(); updateLeaderboard();
-        } catch (e) { alert(e.message); }
+
+            // Send to Google Sheets Webhook (if URL configured)
+            if (GOOGLE_SHEET_WEBHOOK_URL) {
+                fetch(GOOGLE_SHEET_WEBHOOK_URL, {
+                    method: "POST",
+                    mode: "no-cors",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        user: auth.currentUser.email,
+                        amount: totalAmount,
+                        selectedDays: days,
+                        month: currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })
+                    })
+                }).catch(err => console.error("Sheet Sync Failed:", err));
+            }
+
+            alert("Payment recorded! Your calendar will update.");
+            renderCalendar();
+            updateLeaderboard();
+        } catch (e) {
+            alert(e.message);
+        }
     };
+
+    // 7. Leaderboard & Admin
+    async function updateLeaderboard() {
+        try {
+            const snap = await getDocs(collection(db, "payments"));
+            const scores = {};
+            snap.forEach(doc => {
+                const d = doc.data();
+                scores[d.user] = (scores[d.user] || 0) + d.amount;
+            });
+            const sorted = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+            document.getElementById('leader-list').innerHTML = sorted.map(([u, amt], i) => `
+                <div class="leader-row">
+                    <div style="display:flex; align-items:center;">
+                        <div class="rank ${i === 0 ? 'top1' : ''}">${i + 1}</div>
+                        <span>${u.split('@')[0]}</span>
+                    </div>
+                    <b>${amt.toLocaleString()}៛</b>
+                </div>
+            `).join('');
+        } catch (e) {
+            console.error("Error loading leaderboard:", e);
+        }
+    }
+
+    async function loadAdminData() {
+        try {
+            const q = query(collection(db, "payments"), orderBy("timestamp", "desc"));
+            const snap = await getDocs(q);
+            document.getElementById('all-payments-list').innerHTML = snap.docs.map(doc => {
+                const d = doc.data();
+                return `<div style="padding:6px 0; border-bottom:1px solid #ddd;">
+                    <b>${d.user.split('@')[0]}</b>: ${d.amount.toLocaleString()}៛ for days [${d.selectedDays.join(', ')}] (${d.monthKey || 'N/A'})
+                </div>`;
+            }).join('');
+        } catch (e) {
+            console.error("Error loading admin records:", e);
+        }
+    }
 </script>
 </body>
 </html>
