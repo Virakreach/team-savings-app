@@ -1,9 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="km">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Team Savings - CHHOR family</title>
+    <title>សមាគម ដំណើរកំសាន្ត - CHHOR family</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root { 
             --primary: #0066ff; 
@@ -17,7 +20,7 @@
         body { 
             margin: 0; 
             padding: 0; 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            font-family: 'Kantumruy Pro', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
             background-color: var(--bg); 
             display: flex; 
             justify-content: center; 
@@ -52,12 +55,13 @@
         
         /* Auth */
         .auth-card { display: flex; flex-direction: column; gap: 12px; margin-top: 40px; }
-        input { padding: 16px; border: 1px solid #ddd; border-radius: 12px; font-size: 16px; outline: none; }
+        input { padding: 16px; border: 1px solid #ddd; border-radius: 12px; font-size: 15px; font-family: inherit; outline: none; }
         .hidden { display: none !important; }
         
         /* Stats */
         .stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
-        .stat-card { background: #f8f9fa; padding: 15px; border-radius: 15px; text-align: center; }
+        .stat-card { background: #f8f9fa; padding: 15px; border-radius: 15px; text-align: center; font-size: 14px; }
+        .stat-card b { font-size: 18px; }
 
         /* Month Selector Bar */
         .month-bar {
@@ -97,8 +101,8 @@
             grid-template-columns: repeat(7, 1fr);
             gap: 8px;
             text-align: center;
-            font-size: 12px;
-            font-weight: 700;
+            font-size: 11px;
+            font-weight: 600;
             color: #718096;
             margin-bottom: 10px;
         }
@@ -138,15 +142,15 @@
             border: 2px solid var(--primary);
             background: #eef5ff;
             color: var(--primary);
-            font-weight: 800;
+            font-weight: 700;
         }
         .day.today::before {
-            content: "TODAY";
+            content: "ថ្ងៃនេះ";
             position: absolute;
             top: 2px;
-            font-size: 6.5px;
-            font-weight: 800;
-            letter-spacing: 0.3px;
+            font-size: 6px;
+            font-weight: 700;
+            letter-spacing: -0.2px;
         }
         .day.paid { 
             background: var(--paid) !important; 
@@ -185,7 +189,8 @@
             border: none; 
             padding: 16px; 
             border-radius: 14px; 
-            font-size: 16px; 
+            font-size: 15px; 
+            font-family: inherit;
             font-weight: bold; 
             cursor: pointer; 
             width: 100%; 
@@ -210,72 +215,72 @@
 
 <div class="app-shell">
     <header>
-        <h2 style="margin:0; font-size: 22px;">Team Savings</h2>
-        <div id="live-clock" class="clock-badge">--:--:-- --</div>
-        <p id="user-display" style="margin: 8px 0 0; font-size: 14px; opacity: 0.9;">Connecting...</p>
+        <h2 style="margin:0; font-size: 20px;">ការសន្សំប្រាក់ជាក្រុម</h2>
+        <div id="live-clock" class="clock-badge">កំពុងដំណើរការម៉ោង...</div>
+        <p id="user-display" style="margin: 8px 0 0; font-size: 13px; opacity: 0.9;">កំពុងភ្ជាប់...</p>
     </header>
 
     <div class="container">
         <!-- Auth View -->
         <div id="auth-view" class="auth-card">
-            <h3 style="text-align:center; margin-top:0;">Member Sign In</h3>
-            <input type="email" id="email" placeholder="Email Address">
-            <input type="password" id="password" placeholder="Password">
-            <button class="btn" onclick="handleAuth('in')">Sign In</button>
-            <button class="btn btn-secondary" onclick="handleAuth('up')">Create Account</button>
+            <h3 style="text-align:center; margin-top:0;">ចូលគណនីសមាជិក</h3>
+            <input type="email" id="email" placeholder="អាសយដ្ឋានអ៊ីមែល (Email)">
+            <input type="password" id="password" placeholder="ពាក្យសម្ងាត់ (Password)">
+            <button class="btn" onclick="handleAuth('in')">ចូលគណនី</button>
+            <button class="btn btn-secondary" onclick="handleAuth('up')">បង្កើតគណនីថ្មី</button>
         </div>
 
         <!-- Dashboard View -->
         <div id="dashboard-view" class="hidden">
             <div class="stats-row">
-                <div class="stat-card"><span>Days Selected</span><br><b id="count">0</b></div>
-                <div class="stat-card"><span>Total Amount</span><br><b id="total">0</b>៛</div>
+                <div class="stat-card"><span>ចំនួនថ្ងៃបានជ្រើស</span><br><b id="count">0</b> ថ្ងៃ</div>
+                <div class="stat-card"><span>ទឹកប្រាក់សរុប</span><br><b id="total">0</b> ៛</div>
             </div>
 
             <!-- Month Controls -->
             <div class="month-bar">
                 <button class="month-btn" onclick="changeMonth(-1)">&#8592;</button>
-                <span class="month-title" id="month-title">Month Year</span>
+                <span class="month-title" id="month-title">ខែ ឆ្នាំ</span>
                 <button class="month-btn" onclick="changeMonth(1)">&#8594;</button>
             </div>
 
-            <!-- Weekdays Row: Monday to Sunday -->
+            <!-- Weekdays Row (Khmer) -->
             <div class="weekdays-grid">
-                <div>Mon</div>
-                <div>Tue</div>
-                <div>Wed</div>
-                <div>Thu</div>
-                <div>Fri</div>
-                <div>Sat</div>
-                <div>Sun</div>
+                <div>ច័ន្ទ</div>
+                <div>អង្គារ</div>
+                <div>ពុធ</div>
+                <div>ព្រហ</div>
+                <div>សុក្រ</div>
+                <div>សៅរ៍</div>
+                <div>អាទិត្យ</div>
             </div>
 
-            <!-- Dynamic Days Grid -->
+            <!-- Calendar Grid -->
             <div class="calendar-grid" id="calendar"></div>
 
             <!-- Payment Box -->
             <div id="payment-area" class="payment-box hidden">
-                <p style="margin:0; font-weight:bold; font-size: 17px;">Pay <span id="label-amt">0</span>៛</p>
+                <p style="margin:0; font-weight:bold; font-size: 16px;">បង់ប្រាក់ចំនួន <span id="label-amt">0</span> ៛</p>
                 <img src="" class="qr-img" id="dynamic-qr" alt="ABA QR Code">
                 <a id="aba-app-link" href="#" target="_blank" style="text-decoration:none; width: 100%;">
-                    <button class="btn btn-aba">Tap to Pay in ABA App</button>
+                    <button class="btn btn-aba">ចុចដើម្បីបង់តាម ABA App</button>
                 </a>
-                <button class="btn" onclick="submitPayment()">I have sent the money</button>
+                <button class="btn" onclick="submitPayment()">ខ្ញុំបានផ្ញើប្រាក់រួចរាល់</button>
             </div>
 
             <!-- Leaderboard -->
             <div class="leaderboard">
-                <h3 style="margin:0 0 15px 0; font-size: 18px;">Top Savers 🏆</h3>
-                <div id="leader-list">Loading rankings...</div>
+                <h3 style="margin:0 0 15px 0; font-size: 17px;">តារាងអ្នកសន្សំឆ្នើម 🏆</h3>
+                <div id="leader-list">កំពុងផ្ទុកទិន្នន័យ...</div>
             </div>
 
             <!-- Admin Section -->
             <div id="admin-panel" class="admin-panel hidden">
-                <h4 style="margin:0 0 10px 0;">Admin: Recent Submissions</h4>
+                <h4 style="margin:0 0 10px 0;">អ្នកគ្រប់គ្រង: ប្រវត្តិផ្ញើប្រាក់ថ្មីៗ</h4>
                 <div id="all-payments-list"></div>
             </div>
 
-            <button class="btn btn-secondary" onclick="signOutUser()">Log Out</button>
+            <button class="btn btn-secondary" onclick="signOutUser()">ចាកចេញពីគណនី</button>
         </div>
     </div>
 </div>
@@ -314,25 +319,34 @@
         26: "#", 27: "#", 28: "#", 29: "#", 30: "#", 31: "#"
     };
 
+    const khmerMonths = [
+        "មករា", "កុម្ភៈ", "មីនា", "មេសា", "ឧសភា", "មិថុនា", 
+        "កក្កដា", "សីហា", "កញ្ញា", "តុលា", "វិច្ឆិកា", "ធ្នូ"
+    ];
+    const khmerDaysOfWeek = ["អាទិត្យ", "ច័ន្ទ", "អង្គារ", "ពុធ", "ព្រហស្បតិ៍", "សុក្រ", "សៅរ៍"];
+
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
 
     let currentDate = new Date();
 
-    // 1. Live Clock
+    // 1. Live Clock in Khmer
     function updateClock() {
         const now = new Date();
-        const options = { 
-            weekday: 'short', 
-            month: 'short', 
-            day: 'numeric', 
-            hour: '2-digit', 
-            minute: '2-digit', 
-            second: '2-digit', 
-            hour12: true 
-        };
-        document.getElementById('live-clock').innerText = now.toLocaleString('en-US', options);
+        const dayName = khmerDaysOfWeek[now.getDay()];
+        const monthName = khmerMonths[now.getMonth()];
+        const date = now.getDate();
+        const year = now.getFullYear();
+        
+        let hours = now.getHours();
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        const ampm = hours >= 12 ? 'ល្ងាច' : 'ព្រឹក';
+        hours = hours % 12 || 12;
+
+        document.getElementById('live-clock').innerText = 
+            `ថ្ងៃ${dayName} ទី${date} ខែ${monthName} ${year} • ${hours}:${minutes}:${seconds} ${ampm}`;
     }
     setInterval(updateClock, 1000);
     updateClock();
@@ -360,8 +374,8 @@
     window.handleAuth = (type) => {
         const email = document.getElementById('email').value;
         const pass = document.getElementById('password').value;
-        if (type === 'up') createUserWithEmailAndPassword(auth, email, pass).catch(err => alert(err.message));
-        else signInWithEmailAndPassword(auth, email, pass).catch(err => alert(err.message));
+        if (type === 'up') createUserWithEmailAndPassword(auth, email, pass).catch(err => alert("កំហុសក្នុងការបង្កើតគណនី: " + err.message));
+        else signInWithEmailAndPassword(auth, email, pass).catch(err => alert("កំហុសក្នុងការចូលគណនី: " + err.message));
     };
 
     window.signOutUser = () => signOut(auth);
@@ -382,9 +396,8 @@
         const monthKey = `${year}-${String(month + 1).padStart(2, '0')}`;
         const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-        document.getElementById('month-title').innerText = currentDate.toLocaleString('default', { month: 'long', year: 'numeric' });
+        document.getElementById('month-title').innerText = `ខែ${khmerMonths[month]} ឆ្នាំ${year}`;
 
-        // Check against real today's date
         const realToday = new Date();
         const isCurrentMonthView = (realToday.getFullYear() === year && realToday.getMonth() === month);
         const todayDate = realToday.getDate();
@@ -393,14 +406,12 @@
         const firstDayOfWeek = new Date(year, month, 1).getDay();
         const startOffset = (firstDayOfWeek + 6) % 7;
 
-        // Insert empty cells before the 1st
         for (let b = 0; b < startOffset; b++) {
             const emptyCell = document.createElement('div');
             emptyCell.className = 'day empty';
             cal.appendChild(emptyCell);
         }
 
-        // Fetch paid days for current month
         const paidDays = new Set();
         try {
             const q = query(collection(db, "payments"), where("user", "==", auth.currentUser.email));
@@ -412,10 +423,9 @@
                 }
             });
         } catch (e) {
-            console.error("Error reading paid days:", e);
+            console.error("កំហុសក្នុងការទាញទិន្នន័យ:", e);
         }
 
-        // Render actual days
         for (let i = 1; i <= daysInMonth; i++) {
             const d = document.createElement('div');
             d.className = 'day';
@@ -451,7 +461,6 @@
             payArea.classList.remove('hidden');
             document.getElementById('label-amt').innerText = (s * 1000).toLocaleString();
             
-            // Checks root folder first, then ABA-QR folder
             qrImg.src = `${s}.jpg`;
             qrImg.onerror = () => { qrImg.src = `ABA-QR/${s}.jpg`; };
 
@@ -490,16 +499,16 @@
                         user: auth.currentUser.email,
                         amount: totalAmount,
                         selectedDays: days,
-                        month: currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })
+                        month: `ខែ${khmerMonths[month]} ឆ្នាំ${year}`
                     })
                 }).catch(err => console.error("Sheet Sync Failed:", err));
             }
 
-            alert("Payment recorded! Your calendar will update.");
+            alert("បានកត់ត្រាការបង់ប្រាក់ដោយជោគជ័យ! ប្រតិទិនរបស់អ្នកនឹងធ្វើបច្ចុប្បន្នភាព។");
             renderCalendar();
             updateLeaderboard();
         } catch (e) {
-            alert(e.message);
+            alert("បរាជ័យ: " + e.message);
         }
     };
 
@@ -519,11 +528,11 @@
                         <div class="rank ${i === 0 ? 'top1' : ''}">${i + 1}</div>
                         <span>${u.split('@')[0]}</span>
                     </div>
-                    <b>${amt.toLocaleString()}៛</b>
+                    <b>${amt.toLocaleString()} ៛</b>
                 </div>
             `).join('');
         } catch (e) {
-            console.error("Error loading leaderboard:", e);
+            console.error("កំហុសក្នុងការផ្ទុកតារាង:", e);
         }
     }
 
@@ -534,11 +543,11 @@
             document.getElementById('all-payments-list').innerHTML = snap.docs.map(doc => {
                 const d = doc.data();
                 return `<div style="padding:6px 0; border-bottom:1px solid #ddd;">
-                    <b>${d.user.split('@')[0]}</b>: ${d.amount.toLocaleString()}៛ for days [${d.selectedDays.join(', ')}] (${d.monthKey || 'N/A'})
+                    <b>${d.user.split('@')[0]}</b>: ${d.amount.toLocaleString()}៛ សម្រាប់ថ្ងៃ [${d.selectedDays.join(', ')}] (${d.monthKey || 'N/A'})
                 </div>`;
             }).join('');
         } catch (e) {
-            console.error("Error loading admin records:", e);
+            console.error("កំហុសក្នុងការផ្ទុកទិន្នន័យ Admin:", e);
         }
     }
 </script>
