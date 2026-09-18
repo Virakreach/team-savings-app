@@ -90,6 +90,18 @@
             font-weight: 700;
             color: var(--primary);
         }
+
+        /* Weekdays Header */
+        .weekdays-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 700;
+            color: #718096;
+            margin-bottom: 10px;
+        }
         
         /* Calendar Grid */
         .calendar-grid { 
@@ -111,10 +123,44 @@
             font-size: 14px; 
             position: relative; 
             user-select: none;
+            box-sizing: border-box;
         }
-        .day.selected { background: var(--primary); color: white; transform: scale(0.92); }
-        .day.paid { background: var(--paid) !important; color: #888 !important; cursor: not-allowed; opacity: 0.65; }
-        .day.paid::after { content: "✓"; position: absolute; bottom: 2px; font-size: 11px; color: #4cd964; }
+        .day.empty {
+            background: transparent;
+            cursor: default;
+        }
+        .day.selected { 
+            background: var(--primary) !important; 
+            color: white !important; 
+            transform: scale(0.92); 
+        }
+        .day.today {
+            border: 2px solid var(--primary);
+            background: #eef5ff;
+            color: var(--primary);
+            font-weight: 800;
+        }
+        .day.today::before {
+            content: "TODAY";
+            position: absolute;
+            top: 2px;
+            font-size: 6.5px;
+            font-weight: 800;
+            letter-spacing: 0.3px;
+        }
+        .day.paid { 
+            background: var(--paid) !important; 
+            color: #888 !important; 
+            cursor: not-allowed; 
+            opacity: 0.65; 
+        }
+        .day.paid::after { 
+            content: "✓"; 
+            position: absolute; 
+            bottom: 2px; 
+            font-size: 11px; 
+            color: #4cd964; 
+        }
 
         /* Payment UI */
         .payment-box { 
@@ -193,6 +239,18 @@
                 <button class="month-btn" onclick="changeMonth(1)">&#8594;</button>
             </div>
 
+            <!-- Weekdays Row: Monday to Sunday -->
+            <div class="weekdays-grid">
+                <div>Mon</div>
+                <div>Tue</div>
+                <div>Wed</div>
+                <div>Thu</div>
+                <div>Fri</div>
+                <div>Sat</div>
+                <div>Sun</div>
+            </div>
+
+            <!-- Dynamic Days Grid -->
             <div class="calendar-grid" id="calendar"></div>
 
             <!-- Payment Box -->
@@ -237,10 +295,8 @@
         measurementId: "G-ZM7MKHGVXN"
     };
 
-    // Replace with your Google Apps Script Web App URL if logging to Sheets
     const GOOGLE_SHEET_WEBHOOK_URL = "";
 
-    // 31 Days of ABA Deep Links
     const qrData = {
         1: "https://pay.ababank.com/oRF8/u5365ae0",
         2: "https://pay.ababank.com/oRF8/qfhq896b",
@@ -262,7 +318,6 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // Active calendar browsing state
     let currentDate = new Date();
 
     // 1. Live Clock
@@ -317,7 +372,7 @@
         renderCalendar();
     };
 
-    // 4. Calendar Engine
+    // 4. Calendar Engine (Aligned Mon-Sun + Pinned Today)
     async function renderCalendar() {
         const cal = document.getElementById('calendar');
         cal.innerHTML = "";
@@ -329,7 +384,23 @@
 
         document.getElementById('month-title').innerText = currentDate.toLocaleString('default', { month: 'long', year: 'numeric' });
 
-        // Retrieve paid days for this month
+        // Check against real today's date
+        const realToday = new Date();
+        const isCurrentMonthView = (realToday.getFullYear() === year && realToday.getMonth() === month);
+        const todayDate = realToday.getDate();
+
+        // Calculate Monday-based offset (Monday = 0, ..., Sunday = 6)
+        const firstDayOfWeek = new Date(year, month, 1).getDay();
+        const startOffset = (firstDayOfWeek + 6) % 7;
+
+        // Insert empty cells before the 1st
+        for (let b = 0; b < startOffset; b++) {
+            const emptyCell = document.createElement('div');
+            emptyCell.className = 'day empty';
+            cal.appendChild(emptyCell);
+        }
+
+        // Fetch paid days for current month
         const paidDays = new Set();
         try {
             const q = query(collection(db, "payments"), where("user", "==", auth.currentUser.email));
@@ -344,10 +415,16 @@
             console.error("Error reading paid days:", e);
         }
 
+        // Render actual days
         for (let i = 1; i <= daysInMonth; i++) {
             const d = document.createElement('div');
             d.className = 'day';
             d.innerText = i;
+
+            if (isCurrentMonthView && i === todayDate) {
+                d.classList.add('today');
+            }
+
             if (paidDays.has(i)) {
                 d.classList.add('paid');
             } else {
@@ -374,7 +451,7 @@
             payArea.classList.remove('hidden');
             document.getElementById('label-amt').innerText = (s * 1000).toLocaleString();
             
-            // Handles both repository root or ABA-QR folder
+            // Checks root folder first, then ABA-QR folder
             qrImg.src = `${s}.jpg`;
             qrImg.onerror = () => { qrImg.src = `ABA-QR/${s}.jpg`; };
 
@@ -396,7 +473,6 @@
         const totalAmount = days.length * 1000;
 
         try {
-            // Save to Firestore with Month Tracking
             await addDoc(collection(db, "payments"), {
                 user: auth.currentUser.email,
                 amount: totalAmount,
@@ -405,7 +481,6 @@
                 timestamp: serverTimestamp()
             });
 
-            // Send to Google Sheets Webhook (if URL configured)
             if (GOOGLE_SHEET_WEBHOOK_URL) {
                 fetch(GOOGLE_SHEET_WEBHOOK_URL, {
                     method: "POST",
