@@ -179,8 +179,6 @@
             font-weight: 700;
             letter-spacing: -0.2px;
         }
-        
-        /* ថ្ងៃដែលបានបង់រួច៖ ចេញពណ៌ក្រហមច្បាស់ */
         .day.paid { 
             background: var(--paid-bg) !important; 
             color: var(--paid-text) !important; 
@@ -276,7 +274,6 @@
 
         <!-- Dashboard View -->
         <div id="dashboard-view" class="hidden">
-            <!-- ផ្ទាំងស្ថិតិបង្ហាញទាំងប្រាក់បានបង់រួច និងប្រាក់ត្រូវបង់ថ្មី -->
             <div class="stats-row">
                 <div class="stat-card card-paid">
                     <span style="color: #dc2626;">បានបង់រួច (<b id="paid-count">0</b> ថ្ងៃ)</span><br>
@@ -369,7 +366,7 @@
         measurementId: "G-ZM7MKHGVXN"
     };
 
-    const GOOGLE_SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycby4e7cJ5wvNPtbx2VWr_gGTiKSOK32rqKq3Cnfir0swbUHRqItgl0ZGVl-bENczrKl1UA/exec";[cite: 10]
+    const GOOGLE_SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycby4e7cJ5wvNPtbx2VWr_gGTiKSOK32rqKq3Cnfir0swbUHRqItgl0ZGVl-bENczrKl1UA/exec";
 
     const qrData = {
         1: "https://pay.ababank.com/oRF8/80lavgtc",
@@ -430,8 +427,10 @@
         const ampm = hours >= 12 ? 'ល្ងាច' : 'ព្រឹក';
         hours = hours % 12 || 12;
 
-        document.getElementById('live-clock').innerText = 
-            `ថ្ងៃ${dayName} ទី${date} ខែ${monthName} ${year} • ${hours}:${minutes}:${seconds} ${ampm}`;
+        const clockEl = document.getElementById('live-clock');
+        if (clockEl) {
+            clockEl.innerText = `ថ្ងៃ${dayName} ទី${date} ខែ${monthName} ${year} • ${hours}:${minutes}:${seconds} ${ampm}`;
+        }
     }
     setInterval(updateClock, 1000);
     updateClock();
@@ -452,6 +451,7 @@
         } else {
             document.getElementById('auth-view').classList.remove('hidden');
             document.getElementById('dashboard-view').classList.add('hidden');
+            document.getElementById('user-display').innerText = "សូមចូលគណនី";
         }
     });
 
@@ -514,7 +514,6 @@
             cal.appendChild(emptyCell);
         }
 
-        // ស្វែងរកថ្ងៃដែលបានបង់រួច
         const paidDays = new Set();
         try {
             const q = query(collection(db, "payments"), where("user", "==", auth.currentUser.email));
@@ -529,7 +528,6 @@
             console.error("កំហុសក្នុងការទាញទិន្នន័យ:", e);
         }
 
-        // បង្ហាញស្ថិតិទឹកប្រាក់ដែលបានបង់រួចក្នុងខែនេះ
         const paidCount = paidDays.size;
         const paidTotal = paidCount * 1000;
         document.getElementById('paid-count').innerText = paidCount;
@@ -545,7 +543,7 @@
             }
 
             if (paidDays.has(i)) {
-                d.classList.add('paid'); // ថ្ងៃដែលបង់រួចនឹងចេញពណ៌ក្រហម
+                d.classList.add('paid');
             } else {
                 d.onclick = () => { 
                     d.classList.toggle('selected'); 
@@ -579,8 +577,8 @@
             payArea.classList.remove('hidden');
             document.getElementById('label-amt').innerText = (s * 1000).toLocaleString();
             
-            qrImg.src = `${s}.jpg`;[cite: 6]
-            qrImg.onerror = () => { qrImg.src = `ABA-QR/${s}.jpg`; };[cite: 2]
+            qrImg.src = `${s}.jpg`;
+            qrImg.onerror = () => { qrImg.src = `ABA-QR/${s}.jpg`; };
 
             document.getElementById('aba-app-link').href = qrData[s] || "#";
         } else {
@@ -598,7 +596,6 @@
         const monthKey = `${year}-${String(month + 1).padStart(2, '0')}`;
         const totalAmount = days.length * 1000;
 
-        // 1. ផ្ញើទៅ Google Sheet
         if (GOOGLE_SHEET_WEBHOOK_URL) {
             fetch(GOOGLE_SHEET_WEBHOOK_URL, {
                 method: "POST",
@@ -613,7 +610,6 @@
             }).catch(err => console.error("Sheet Sync Failed:", err));
         }
 
-        // 2. កត់ត្រាទុកក្នុង Firebase
         try {
             await addDoc(collection(db, "payments"), {
                 user: auth.currentUser.email,
