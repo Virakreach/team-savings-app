@@ -71,7 +71,7 @@
             background: #f8f9fa;
             border-radius: 14px;
             padding: 8px 12px;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
         }
         .month-btn {
             background: var(--primary);
@@ -93,6 +93,30 @@
             font-size: 16px;
             font-weight: 700;
             color: var(--primary);
+        }
+
+        /* Pay Full Month Button */
+        .btn-full-month {
+            background: #eef5ff;
+            color: var(--primary);
+            border: 1.5px solid var(--primary);
+            padding: 11px 14px;
+            border-radius: 12px;
+            font-size: 13.5px;
+            font-family: inherit;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 15px;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .btn-full-month:active {
+            transform: scale(0.98);
+            background: #dbeafe;
         }
 
         /* Weekdays Header */
@@ -215,7 +239,7 @@
 
 <div class="app-shell">
     <header>
-        <h2 style="margin:0; font-size: 20px;">ការសន្សំប្រាក់ជាក្រុម</h2>
+        <h2 style="margin:0; font-size: 20px;">សមាគម ដំណើរកំសាន្ត</h2>
         <div id="live-clock" class="clock-badge">កំពុងដំណើរការម៉ោង...</div>
         <p id="user-display" style="margin: 8px 0 0; font-size: 13px; opacity: 0.9;">កំពុងភ្ជាប់...</p>
     </header>
@@ -244,7 +268,12 @@
                 <button class="month-btn" onclick="changeMonth(1)">&#8594;</button>
             </div>
 
-            <!-- Weekdays Row (Khmer) -->
+            <!-- Full Month Quick Action Button -->
+            <button class="btn-full-month" id="btn-full-month" onclick="toggleSelectFullMonth()">
+                <span>📅</span> <span id="full-month-text">បង់ប្រាក់ពេញមួយខែ (ជ្រើសទាំងអស់)</span>
+            </button>
+
+            <!-- Weekdays Row -->
             <div class="weekdays-grid">
                 <div>ច័ន្ទ</div>
                 <div>អង្គារ</div>
@@ -331,7 +360,7 @@
 
     let currentDate = new Date();
 
-    // 1. Live Clock in Khmer
+    // 1. Live Clock
     function updateClock() {
         const now = new Date();
         const dayName = khmerDaysOfWeek[now.getDay()];
@@ -386,7 +415,29 @@
         renderCalendar();
     };
 
-    // 4. Calendar Engine (Aligned Mon-Sun + Pinned Today)
+    // 4. Pay For Full Month Toggle Function
+    window.toggleSelectFullMonth = () => {
+        const unpaidDays = Array.from(document.querySelectorAll('.day:not(.paid):not(.empty)'));
+        if (unpaidDays.length === 0) {
+            alert("អ្នកបានបង់ប្រាក់គ្រប់ថ្ងៃក្នុងខែនេះរួចរាល់ហើយ!");
+            return;
+        }
+
+        const selectedDays = document.querySelectorAll('.day.selected');
+        const isAllSelected = unpaidDays.length === selectedDays.length;
+
+        unpaidDays.forEach(d => {
+            if (isAllSelected) {
+                d.classList.remove('selected');
+            } else {
+                d.classList.add('selected');
+            }
+        });
+
+        updateUI();
+    };
+
+    // 5. Calendar Engine
     async function renderCalendar() {
         const cal = document.getElementById('calendar');
         cal.innerHTML = "";
@@ -402,7 +453,6 @@
         const isCurrentMonthView = (realToday.getFullYear() === year && realToday.getMonth() === month);
         const todayDate = realToday.getDate();
 
-        // Calculate Monday-based offset (Monday = 0, ..., Sunday = 6)
         const firstDayOfWeek = new Date(year, month, 1).getDay();
         const startOffset = (firstDayOfWeek + 6) % 7;
 
@@ -448,12 +498,23 @@
         updateUI();
     }
 
-    // 5. Payment UI Engine
+    // 6. Payment UI Engine
     function updateUI() {
-        const s = document.querySelectorAll('.day.selected').length;
+        const unpaidDays = document.querySelectorAll('.day:not(.paid):not(.empty)');
+        const selectedDays = document.querySelectorAll('.day.selected');
+        const s = selectedDays.length;
+
         document.getElementById('count').innerText = s;
         document.getElementById('total').innerText = (s * 1000).toLocaleString();
         
+        // Update Full Month Button Text Dynamically
+        const fullMonthText = document.getElementById('full-month-text');
+        if (unpaidDays.length > 0 && s === unpaidDays.length) {
+            fullMonthText.innerText = "ដោះការជ្រើសរើសទាំងអស់ (Deselect All)";
+        } else {
+            fullMonthText.innerText = "បង់ប្រាក់ពេញមួយខែ (ជ្រើសទាំងអស់)";
+        }
+
         const payArea = document.getElementById('payment-area');
         const qrImg = document.getElementById('dynamic-qr');
 
@@ -470,7 +531,7 @@
         }
     }
 
-    // 6. Submit Payment
+    // 7. Submit Payment
     window.submitPayment = async () => {
         const sel = document.querySelectorAll('.day.selected');
         const days = Array.from(sel).map(n => parseInt(n.innerText));
@@ -512,7 +573,7 @@
         }
     };
 
-    // 7. Leaderboard & Admin
+    // 8. Leaderboard & Admin
     async function updateLeaderboard() {
         try {
             const snap = await getDocs(collection(db, "payments"));
