@@ -313,10 +313,10 @@
             <div class="sheet-box">
                 <h3 style="margin:0 0 10px 0; font-size: 17px;">តារាងទិន្នន័យសន្សំប្រាក់ (Google Sheet) 📊</h3>
                 <iframe 
-                 id="sheet-iframe"
-                 src="https://docs.google.com/spreadsheets/d/e/2PACX-1vScooRukEEAbukF9QFOxrY3OESERf3Ki2FIckaEUBVYRBzplg2tQrOGC7pE5pdrFRLLmQ95DtpAFj3w/pubhtml?embedded=true" 
-                 style="width: 100%; height: 320px; border: 1px solid #ddd; border-radius: 12px; background: #fff;"
-                 title="Google Sheet Database">
+                    id="sheet-iframe"
+                    src="https://docs.google.com/spreadsheets/d/e/2PACX-1vScooRukEEAbukF9QFOxrY3OESERf3Ki2FIckaEUBVYRBzplg2tQrOGC7pE5pdrFRLLmQ95DtpAFj3w/pubhtml?embedded=true" 
+                    style="width: 100%; height: 320px; border: 1px solid #ddd; border-radius: 12px; background: #fff;"
+                    title="Google Sheet Database">
                 </iframe>
             </div>
 
@@ -346,24 +346,42 @@
         measurementId: "G-ZM7MKHGVXN"
     };
 
-    // Google Apps Script Webhook URL
-    const GOOGLE_SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycby4e7cJ5wvNPtbx2VWr_gGTiKSOK32rqKq3Cnfir0swbUHRqItgl0ZGVl-bENczrKl1UA/exec";
+    // Google Apps Script Webhook URL[cite: 10]
+    const GOOGLE_SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycby4e7cJ5wvNPtbx2VWr_gGTiKSOK32rqKq3Cnfir0swbUHRqItgl0ZGVl-bENczrKl1UA/exec";[cite: 10]
 
+    // Complete 31 ABA Payment Links
     const qrData = {
-        1: "https://pay.ababank.com/oRF8/u5365ae0",
-        2: "https://pay.ababank.com/oRF8/qfhq896b",
-        3: "https://pay.ababank.com/oRF8/1chyxf7l",
-        4: "https://pay.ababank.com/oRF8/xdle8p4z",
-        5: "https://pay.ababank.com/oRF8/uxifpikk",
-        6: "https://pay.ababank.com/oRF8/8ftyaedt",
-        7: "https://pay.ababank.com/oRF8/f7goqo7c",
-        8: "https://pay.ababank.com/oRF8/s4l5uasf",
-        9: "https://pay.ababank.com/oRF8/av6lypgj",
-        10: "https://pay.ababank.com/oRF8/w1ehwjpl",
-        11: "#", 12: "#", 13: "#", 14: "#", 15: "#",
-        16: "#", 17: "#", 18: "#", 19: "#", 20: "#",
-        21: "#", 22: "#", 23: "#", 24: "#", 25: "#",
-        26: "#", 27: "#", 28: "#", 29: "#", 30: "#", 31: "#"
+        1: "https://pay.ababank.com/oRF8/80lavgtc",
+        2: "https://pay.ababank.com/oRF8/972krs67",
+        3: "https://pay.ababank.com/oRF8/rwdbttus",
+        4: "https://pay.ababank.com/oRF8/8umwnt0h",
+        5: "https://pay.ababank.com/oRF8/ui8qi0cx",
+        6: "https://pay.ababank.com/oRF8/7dzgfuw7",
+        7: "https://pay.ababank.com/oRF8/adzfdtke",
+        8: "https://pay.ababank.com/oRF8/tforp9c3",
+        9: "https://pay.ababank.com/oRF8/i935witn",
+        10: "https://pay.ababank.com/oRF8/jt7ltpz6",
+        11: "https://pay.ababank.com/oRF8/2ygseyjr",
+        12: "https://pay.ababank.com/oRF8/6vf3jyxb",
+        13: "https://pay.ababank.com/oRF8/tdw5qixt",
+        14: "https://pay.ababank.com/oRF8/twc9orxb",
+        15: "https://pay.ababank.com/oRF8/97ibma8o",
+        16: "https://pay.ababank.com/oRF8/xfnw4wtf",
+        17: "https://pay.ababank.com/oRF8/lo0vwzvg",
+        18: "https://pay.ababank.com/oRF8/lefa3kut",
+        19: "https://pay.ababank.com/oRF8/uruglsr1",
+        20: "https://pay.ababank.com/oRF8/sk7ylvxf",
+        21: "https://pay.ababank.com/oRF8/zt7epiij",
+        22: "https://pay.ababank.com/oRF8/u0j0r3tp",
+        23: "https://pay.ababank.com/oRF8/8f3138zf",
+        24: "https://pay.ababank.com/oRF8/f6tkbsx5",
+        25: "https://pay.ababank.com/oRF8/1b81ulv3",
+        26: "https://pay.ababank.com/oRF8/fog96uj1",
+        27: "https://pay.ababank.com/oRF8/vmyeq1jd",
+        28: "https://pay.ababank.com/oRF8/zc8qzks8",
+        29: "https://pay.ababank.com/oRF8/z1yr97uq",
+        30: "https://pay.ababank.com/oRF8/80ref4lv",
+        31: "https://pay.ababank.com/oRF8/ohijdv8c"
     };
 
     const khmerMonths = [
@@ -539,8 +557,8 @@
             payArea.classList.remove('hidden');
             document.getElementById('label-amt').innerText = (s * 1000).toLocaleString();
             
-            qrImg.src = `${s}.jpg`;
-            qrImg.onerror = () => { qrImg.src = `ABA-QR/${s}.jpg`; };
+            qrImg.src = `${s}.jpg`;[cite: 6]
+            qrImg.onerror = () => { qrImg.src = `ABA-QR/${s}.jpg`; };[cite: 2]
 
             document.getElementById('aba-app-link').href = qrData[s] || "#";
         } else {
@@ -568,12 +586,11 @@
                 timestamp: serverTimestamp()
             });
 
-            // Post to Google Sheet Webhook
             if (GOOGLE_SHEET_WEBHOOK_URL) {
                 fetch(GOOGLE_SHEET_WEBHOOK_URL, {
                     method: "POST",
                     mode: "no-cors",
-                    headers: { "Content-Type": "application/json" },
+                    headers: { "Content-Type": "text/plain" },
                     body: JSON.stringify({
                         user: auth.currentUser.email,
                         amount: totalAmount,
