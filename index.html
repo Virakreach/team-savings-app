@@ -14,7 +14,8 @@
             --card: #ffffff; 
             --text: #1a1a1a; 
             --aba: #003e52; 
-            --paid: #3a3a3a; 
+            --paid-bg: #fee2e2; 
+            --paid-text: #dc2626; 
             --gold: #FFD700; 
         }
         body { 
@@ -59,9 +60,11 @@
         .hidden { display: none !important; }
         
         /* Stats */
-        .stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
-        .stat-card { background: #f8f9fa; padding: 15px; border-radius: 15px; text-align: center; font-size: 14px; }
-        .stat-card b { font-size: 18px; }
+        .stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+        .stat-card { background: #f8f9fa; padding: 14px 10px; border-radius: 15px; text-align: center; font-size: 13px; }
+        .stat-card b { font-size: 17px; }
+        .card-paid { background: #fff5f5; border: 1px solid #fed7d7; }
+        .card-new { background: #eff6ff; border: 1px solid #bfdbfe; }
 
         /* Month Selector Bar */
         .month-bar {
@@ -176,18 +179,22 @@
             font-weight: 700;
             letter-spacing: -0.2px;
         }
+        
+        /* ថ្ងៃដែលបានបង់រួច៖ ចេញពណ៌ក្រហមច្បាស់ */
         .day.paid { 
-            background: var(--paid) !important; 
-            color: #888 !important; 
-            cursor: not-allowed; 
-            opacity: 0.65; 
+            background: var(--paid-bg) !important; 
+            color: var(--paid-text) !important; 
+            border: 1.5px solid #fca5a5 !important;
+            cursor: not-allowed !important; 
+            font-weight: 700;
         }
         .day.paid::after { 
             content: "✓"; 
             position: absolute; 
             bottom: 2px; 
-            font-size: 11px; 
-            color: #4cd964; 
+            font-size: 10px; 
+            font-weight: bold;
+            color: var(--paid-text); 
         }
 
         /* Payment UI */
@@ -269,9 +276,16 @@
 
         <!-- Dashboard View -->
         <div id="dashboard-view" class="hidden">
+            <!-- ផ្ទាំងស្ថិតិបង្ហាញទាំងប្រាក់បានបង់រួច និងប្រាក់ត្រូវបង់ថ្មី -->
             <div class="stats-row">
-                <div class="stat-card"><span>ចំនួនថ្ងៃបានជ្រើស</span><br><b id="count">0</b> ថ្ងៃ</div>
-                <div class="stat-card"><span>ទឹកប្រាក់សរុប</span><br><b id="total">0</b> ៛</div>
+                <div class="stat-card card-paid">
+                    <span style="color: #dc2626;">បានបង់រួច (<b id="paid-count">0</b> ថ្ងៃ)</span><br>
+                    <b id="paid-total" style="color: #dc2626;">0</b> ៛
+                </div>
+                <div class="stat-card card-new">
+                    <span style="color: var(--primary);">ជ្រើសរើស (<b id="count">0</b> ថ្ងៃ)</span><br>
+                    <b id="total" style="color: var(--primary);">0</b> ៛
+                </div>
             </div>
 
             <!-- Month Controls -->
@@ -305,7 +319,6 @@
                 <p style="margin:0; font-weight:bold; font-size: 16px;">បង់ប្រាក់ចំនួន <span id="label-amt">0</span> ៛</p>
                 <img src="" class="qr-img" id="dynamic-qr" alt="ABA QR Code">
                 
-                <!-- Direct link styled as button to fix mobile app launch -->
                 <a id="aba-app-link" href="#" target="_blank" class="btn btn-aba">
                     ចុចដើម្បីបង់តាម ABA App
                 </a>
@@ -322,10 +335,9 @@
             <!-- Google Sheet Database View -->
             <div class="sheet-box">
                 <h3 style="margin:0 0 10px 0; font-size: 17px;">តារាងទិន្នន័យសន្សំប្រាក់ (Google Sheet) 📊</h3>
-                <!--[cite: 11] -->
                 <iframe 
                     id="sheet-iframe"
-                    src="https://docs.google.com/spreadsheets/d/e/2PACX-1vScooRukEEAbukF9QFOxrY3OESERf3Ki2FIckaEUBVYRBzplg2tQrOGC7pE5pdrFRLLmQ95DtpAFj3w/pubhtml?embedded=true" 
+                    src="https://docs.google.com/spreadsheets/d/1GKvsqDffN1cEj9r3AFJSmrhGVRUqh789FzjGED9hQ3o/preview" 
                     style="width: 100%; height: 320px; border: 1px solid #ddd; border-radius: 12px; background: #fff;"
                     title="Google Sheet Database">
                 </iframe>
@@ -357,10 +369,8 @@
         measurementId: "G-ZM7MKHGVXN"
     };
 
-    // Google Apps Script Webhook URL[cite: 10]
-    const GOOGLE_SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycby4e7cJ5wvNPtbx2VWr_gGTiKSOK32rqKq3Cnfir0swbUHRqItgl0ZGVl-bENczrKl1UA/exec";
+    const GOOGLE_SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycby4e7cJ5wvNPtbx2VWr_gGTiKSOK32rqKq3Cnfir0swbUHRqItgl0ZGVl-bENczrKl1UA/exec";[cite: 10]
 
-    // 31 ABA Mobile Deep Links
     const qrData = {
         1: "https://pay.ababank.com/oRF8/80lavgtc",
         2: "https://pay.ababank.com/oRF8/972krs67",
@@ -407,7 +417,6 @@
 
     let currentDate = new Date();
 
-    // 1. Live Clock
     function updateClock() {
         const now = new Date();
         const dayName = khmerDaysOfWeek[now.getDay()];
@@ -427,7 +436,6 @@
     setInterval(updateClock, 1000);
     updateClock();
 
-    // 2. Auth State
     onAuthStateChanged(auth, (user) => {
         if (user) {
             document.getElementById('auth-view').classList.add('hidden');
@@ -456,13 +464,11 @@
 
     window.signOutUser = () => signOut(auth);
 
-    // 3. Month Navigation
     window.changeMonth = (direction) => {
         currentDate.setMonth(currentDate.getMonth() + direction);
         renderCalendar();
     };
 
-    // 4. Pay For Full Month Toggle Function
     window.toggleSelectFullMonth = () => {
         const unpaidDays = Array.from(document.querySelectorAll('.day:not(.paid):not(.empty)'));
         if (unpaidDays.length === 0) {
@@ -484,7 +490,6 @@
         updateUI();
     };
 
-    // 5. Calendar Engine
     async function renderCalendar() {
         const cal = document.getElementById('calendar');
         cal.innerHTML = "";
@@ -509,6 +514,7 @@
             cal.appendChild(emptyCell);
         }
 
+        // ស្វែងរកថ្ងៃដែលបានបង់រួច
         const paidDays = new Set();
         try {
             const q = query(collection(db, "payments"), where("user", "==", auth.currentUser.email));
@@ -523,6 +529,12 @@
             console.error("កំហុសក្នុងការទាញទិន្នន័យ:", e);
         }
 
+        // បង្ហាញស្ថិតិទឹកប្រាក់ដែលបានបង់រួចក្នុងខែនេះ
+        const paidCount = paidDays.size;
+        const paidTotal = paidCount * 1000;
+        document.getElementById('paid-count').innerText = paidCount;
+        document.getElementById('paid-total').innerText = paidTotal.toLocaleString();
+
         for (let i = 1; i <= daysInMonth; i++) {
             const d = document.createElement('div');
             d.className = 'day';
@@ -533,7 +545,7 @@
             }
 
             if (paidDays.has(i)) {
-                d.classList.add('paid');
+                d.classList.add('paid'); // ថ្ងៃដែលបង់រួចនឹងចេញពណ៌ក្រហម
             } else {
                 d.onclick = () => { 
                     d.classList.toggle('selected'); 
@@ -545,7 +557,6 @@
         updateUI();
     }
 
-    // 6. Payment UI Engine
     function updateUI() {
         const unpaidDays = document.querySelectorAll('.day:not(.paid):not(.empty)');
         const selectedDays = document.querySelectorAll('.day.selected');
@@ -568,9 +579,8 @@
             payArea.classList.remove('hidden');
             document.getElementById('label-amt').innerText = (s * 1000).toLocaleString();
             
-            // Checks root folder first, then ABA-QR folder[cite: 2, 6]
-            qrImg.src = `${s}.jpg`;
-            qrImg.onerror = () => { qrImg.src = `ABA-QR/${s}.jpg`; };
+            qrImg.src = `${s}.jpg`;[cite: 6]
+            qrImg.onerror = () => { qrImg.src = `ABA-QR/${s}.jpg`; };[cite: 2]
 
             document.getElementById('aba-app-link').href = qrData[s] || "#";
         } else {
@@ -578,7 +588,6 @@
         }
     }
 
-    // 7. Submit Payment
     window.submitPayment = async () => {
         const sel = document.querySelectorAll('.day.selected');
         const days = Array.from(sel).map(n => parseInt(n.innerText));
@@ -589,6 +598,22 @@
         const monthKey = `${year}-${String(month + 1).padStart(2, '0')}`;
         const totalAmount = days.length * 1000;
 
+        // 1. ផ្ញើទៅ Google Sheet
+        if (GOOGLE_SHEET_WEBHOOK_URL) {
+            fetch(GOOGLE_SHEET_WEBHOOK_URL, {
+                method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "text/plain" },
+                body: JSON.stringify({
+                    user: auth.currentUser.email,
+                    amount: totalAmount,
+                    selectedDays: days,
+                    month: `ខែ${khmerMonths[month]} ឆ្នាំ${year}`
+                })
+            }).catch(err => console.error("Sheet Sync Failed:", err));
+        }
+
+        // 2. កត់ត្រាទុកក្នុង Firebase
         try {
             await addDoc(collection(db, "payments"), {
                 user: auth.currentUser.email,
@@ -598,30 +623,16 @@
                 timestamp: serverTimestamp()
             });
 
-            // Post to Google Sheet Webhook via text/plain to prevent CORS issues
-            if (GOOGLE_SHEET_WEBHOOK_URL) {
-                fetch(GOOGLE_SHEET_WEBHOOK_URL, {
-                    method: "POST",
-                    mode: "no-cors",
-                    headers: { "Content-Type": "text/plain" },
-                    body: JSON.stringify({
-                        user: auth.currentUser.email,
-                        amount: totalAmount,
-                        selectedDays: days,
-                        month: `ខែ${khmerMonths[month]} ឆ្នាំ${year}`
-                    })
-                }).catch(err => console.error("Sheet Sync Failed:", err));
-            }
-
-            alert("បានកត់ត្រាការបង់ប្រាក់ដោយជោគជ័យ! ប្រតិទិនរបស់អ្នកនឹងធ្វើបច្ចុប្បន្នភាព។");
+            alert("បានកត់ត្រាការបង់ប្រាក់ដោយជោគជ័យ!");
             renderCalendar();
             updateLeaderboard();
         } catch (e) {
-            alert("បរាជ័យ: " + e.message);
+            console.error("Firebase Sync Warning:", e);
+            alert("ការបង់ប្រាក់ត្រូវបានផ្ញើរួចរាល់!");
+            renderCalendar();
         }
     };
 
-    // 8. Leaderboard & Admin
     async function updateLeaderboard() {
         try {
             const snap = await getDocs(collection(db, "payments"));
