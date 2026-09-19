@@ -8,6 +8,7 @@
     <!-- PWA & Mobile App Settings -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0066ff">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="CHHOR Savings">
@@ -245,6 +246,22 @@
             text-align: center; 
         }
         .btn-secondary { background: #eee; color: #333; margin-top: 15px; }
+        .btn-sheet { 
+            background: #107c41; 
+            color: white; 
+            text-decoration: none; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 8px;
+            padding: 14px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 14px;
+            box-sizing: border-box;
+            transition: 0.2s;
+        }
+        .btn-sheet:active { transform: scale(0.98); opacity: 0.9; }
 
         /* Leaderboard & Sheets Section */
         .leaderboard, .sheet-box { 
@@ -338,20 +355,23 @@
                 <div id="leader-list">កំពុងផ្ទុកទិន្នន័យ...</div>
             </div>
 
-            <!-- Google Sheet Database View -->
+            <!-- Google Sheet Database View (បើកតាម Link ផ្ទាល់ គ្មាន Error 404) -->
             <div class="sheet-box">
-                <h3 style="margin:0 0 10px 0; font-size: 17px;">តារាងទិន្នន័យសន្សំប្រាក់ (Google Sheet) 📊</h3>
-                <iframe 
-                    id="sheet-iframe"
-                    src="https://docs.google.com/spreadsheets/d/1GKvsqDffN1cEj9r3AFJSmrhGVRUqh789FzjGED9hQ3o/preview" 
-                    style="width: 100%; height: 320px; border: 1px solid #ddd; border-radius: 12px; background: #fff;"
-                    title="Google Sheet Database">
-                </iframe>
+                <h3 style="margin:0 0 12px 0; font-size: 17px;">តារាងទិន្នន័យសន្សំប្រាក់ (Google Sheet) 📊</h3>
+                <p style="font-size: 13px; color: #666; margin: 0 0 12px 0;">ទិន្នន័យបង់ប្រាក់ទាំងអស់ត្រូវបានរក្សាទុកដោយស្វ័យប្រវត្តិក្នង Google Sheet។</p>
+                <a href="https://docs.google.com/spreadsheets/d/1GKvsqDffN1cEj9r3AFJSmrhGVRUqh789FzjGED9hQ3o/edit?usp=sharing" target="_blank" class="btn-sheet">
+                    📊 ចុចទីនេះដើម្បីបើកមើល Google Sheet ផ្ទាល់
+                </a>
             </div>
 
             <!-- Admin Section -->
             <div id="admin-panel" class="admin-panel hidden">
-                <h4 style="margin:0 0 10px 0;">អ្នកគ្រប់គ្រង: ប្រវត្តិផ្ញើប្រាក់ថ្មីៗ</h4>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <h4 style="margin:0;">អ្នកគ្រប់គ្រង: ប្រវត្តិផ្ញើប្រាក់ថ្មីៗ</h4>
+                    <button onclick="resetAllPayments()" style="background: #dc2626; color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; font-family: inherit; font-weight: bold;">
+                        🗑️ Reset ប្រតិទិន
+                    </button>
+                </div>
                 <div id="all-payments-list"></div>
             </div>
 
@@ -363,7 +383,7 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, collection, addDoc, getDocs, query, where, serverTimestamp, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, where, serverTimestamp, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyDhkBEuYi3iz4OBclqRIsRrfuij8CATBK4",
@@ -375,6 +395,7 @@
         measurementId: "G-ZM7MKHGVXN"
     };
 
+    // Google Apps Script Webhook URL ថ្មីរបស់អ្នក
     const GOOGLE_SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbzvYucGbEF9mrLN5fUchcLndXG87fmgzxJlCq9ItmJtkLWbvR09EpO4zR6Io5QTuD9FPw/exec";
 
     const qrData = {
@@ -605,7 +626,7 @@
         const monthKey = `${year}-${String(month + 1).padStart(2, '0')}`;
         const totalAmount = days.length * 1000;
 
-        // ផ្ញើទៅ Google Sheet ជាមួយ monthKey សម្រាប់បង្កើត Tab ស្វ័យប្រវត្តិ
+        // 1. ផ្ញើទៅ Google Sheet
         if (GOOGLE_SHEET_WEBHOOK_URL) {
             fetch(GOOGLE_SHEET_WEBHOOK_URL, {
                 method: "POST",
@@ -621,6 +642,7 @@
             }).catch(err => console.error("Sheet Sync Failed:", err));
         }
 
+        // 2. កត់ត្រាទុកក្នុង Firebase
         try {
             await addDoc(collection(db, "payments"), {
                 user: auth.currentUser.email,
@@ -637,6 +659,25 @@
             console.error("Firebase Sync Warning:", e);
             alert("ការបង់ប្រាក់ត្រូវបានផ្ញើរួចរាល់!");
             renderCalendar();
+        }
+    };
+
+    // Reset Function សម្រាប់ Admin
+    window.resetAllPayments = async () => {
+        const confirmReset = confirm("តើអ្នកពិតជាចង់ Reset ទិន្នន័យលើប្រតិទិនមែនទេ? ទិន្នន័យលើប្រតិទិននឹងត្រឡប់មកលេខ ០ វិញ!");
+        if (!confirmReset) return;
+
+        try {
+            const snap = await getDocs(collection(db, "payments"));
+            const deletePromises = snap.docs.map(d => deleteDoc(doc(db, "payments", d.id)));
+            await Promise.all(deletePromises);
+
+            alert("បាន Reset ប្រតិទិនដោយជោគជ័យ!");
+            renderCalendar();
+            updateLeaderboard();
+            loadAdminData();
+        } catch (e) {
+            alert("កំហុសក្នុងការ Reset: " + e.message);
         }
     };
 
