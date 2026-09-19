@@ -12,7 +12,10 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="CHHOR Savings">
-    <link rel="apple-touch-icon" href="https://img.icons8.com/color/192/gold-bars.png">
+    
+    <!-- App Icons (រូបកូនជ្រូកលើផ្កាឈូក) -->
+    <link rel="icon" type="image/png" href="icon.png">
+    <link rel="apple-touch-icon" href="icon.png">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -237,6 +240,14 @@
             margin-top: 10px; 
         }
         .btn:active { transform: scale(0.98); }
+        .btn:disabled { 
+            background: #cbd5e1 !important; 
+            color: #64748b !important; 
+            cursor: not-allowed !important; 
+            transform: none !important; 
+            box-shadow: none !important; 
+            opacity: 0.7;
+        }
         .btn-aba { 
             background: var(--aba); 
             color: white; 
@@ -342,11 +353,15 @@
                 <p style="margin:0; font-weight:bold; font-size: 16px;">បង់ប្រាក់ចំនួន <span id="label-amt">0</span> ៛</p>
                 <img src="" class="qr-img" id="dynamic-qr" alt="ABA QR Code">
                 
-                <a id="aba-app-link" href="#" target="_blank" class="btn btn-aba">
-                    ចុចដើម្បីបង់តាម ABA App
+                <a id="aba-app-link" href="#" target="_blank" class="btn btn-aba" onclick="unlockSubmitButton()">
+                    📲 ចុចដើម្បីបង់តាម ABA App
                 </a>
+
+                <p id="lock-hint" style="font-size: 12.5px; color: #dc2626; margin: 10px 0 2px; font-weight: 500;">
+                    🔒 សូមចុចប៊ូតុង ABA ខាងលើជាមុនសិន ដើម្បីដោះសោប៊ូតុងបញ្ជាក់
+                </p>
                 
-                <button class="btn" onclick="submitPayment()">ខ្ញុំបានផ្ញើប្រាក់រួចរាល់</button>
+                <button id="btn-submit" class="btn" onclick="submitPayment()" disabled>ខ្ញុំបានផ្ញើប្រាក់រួចរាល់</button>
             </div>
 
             <!-- Leaderboard -->
@@ -355,10 +370,10 @@
                 <div id="leader-list">កំពុងផ្ទុកទិន្នន័យ...</div>
             </div>
 
-            <!-- Google Sheet Database View (បើកតាម Link ផ្ទាល់ គ្មាន Error 404) -->
+            <!-- Google Sheet Database View -->
             <div class="sheet-box">
                 <h3 style="margin:0 0 12px 0; font-size: 17px;">តារាងទិន្នន័យសន្សំប្រាក់ (Google Sheet) 📊</h3>
-                <p style="font-size: 13px; color: #666; margin: 0 0 12px 0;">ទិន្នន័យបង់ប្រាក់ទាំងអស់ត្រូវបានរក្សាទុកដោយស្វ័យប្រវត្តិក្នង Google Sheet។</p>
+                <p style="font-size: 13px; color: #666; margin: 0 0 12px 0;">ទិន្នន័យបង់ប្រាក់ទាំងអស់ត្រូវបានកត់ត្រាទុកក្នុង Google Sheet តាមខែនីមួយៗ។</p>
                 <a href="https://docs.google.com/spreadsheets/d/1GKvsqDffN1cEj9r3AFJSmrhGVRUqh789FzjGED9hQ3o/edit?usp=sharing" target="_blank" class="btn-sheet">
                     📊 ចុចទីនេះដើម្បីបើកមើល Google Sheet ផ្ទាល់
                 </a>
@@ -520,6 +535,14 @@
         updateUI();
     };
 
+    // ដោះសោរប៊ូតុងបញ្ជាក់ការផ្ញើប្រាក់ ពេលចុចលើ Link ABA
+    window.unlockSubmitButton = () => {
+        const btn = document.getElementById('btn-submit');
+        const hint = document.getElementById('lock-hint');
+        if (btn) btn.disabled = false;
+        if (hint) hint.style.display = 'none';
+    };
+
     async function renderCalendar() {
         const cal = document.getElementById('calendar');
         cal.innerHTML = "";
@@ -611,6 +634,12 @@
             qrImg.onerror = () => { qrImg.src = `ABA-QR/${s}.jpg`; };
 
             document.getElementById('aba-app-link').href = qrData[s] || "#";
+
+            // ចាក់សោប៊ូតុង និងបង្ហាញសាររំលឹកឡើងវិញរាល់ពេលជ្រើសថ្ងៃថ្មី
+            const submitBtn = document.getElementById('btn-submit');
+            const hint = document.getElementById('lock-hint');
+            if (submitBtn) submitBtn.disabled = true;
+            if (hint) hint.style.display = 'block';
         } else {
             payArea.classList.add('hidden');
         }
@@ -626,7 +655,7 @@
         const monthKey = `${year}-${String(month + 1).padStart(2, '0')}`;
         const totalAmount = days.length * 1000;
 
-        // 1. ផ្ញើទៅ Google Sheet
+        // 1. ផ្ញើទៅ Google Sheet ជាមួយ monthKey
         if (GOOGLE_SHEET_WEBHOOK_URL) {
             fetch(GOOGLE_SHEET_WEBHOOK_URL, {
                 method: "POST",
@@ -642,7 +671,7 @@
             }).catch(err => console.error("Sheet Sync Failed:", err));
         }
 
-        // 2. កត់ត្រាទុកក្នុង Firebase
+        // 2. កត់ត្រាទុកក្នុង Firebase Firestore
         try {
             await addDoc(collection(db, "payments"), {
                 user: auth.currentUser.email,
