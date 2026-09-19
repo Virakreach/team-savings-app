@@ -13,7 +13,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="CHHOR Savings">
     
-    <!-- App Icons (រូបកូនជ្រូកលើផ្កាឈូក) -->
+    <!-- App Icons -->
     <link rel="icon" type="image/png" href="icon.png">
     <link rel="apple-touch-icon" href="icon.png">
 
@@ -379,7 +379,7 @@
                 </a>
             </div>
 
-            <!-- Admin Section -->
+            <!-- Admin Section (បង្ហាញសម្រាប់តែ boylovecar44@gmail.com ប៉ុណ្ណោះ) -->
             <div id="admin-panel" class="admin-panel hidden">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                     <h4 style="margin:0;">អ្នកគ្រប់គ្រង: ប្រវត្តិផ្ញើប្រាក់ថ្មីៗ</h4>
@@ -410,7 +410,7 @@
         measurementId: "G-ZM7MKHGVXN"
     };
 
-    // Google Apps Script Webhook URL ថ្មីរបស់អ្នក
+    // Google Apps Script Webhook URL
     const GOOGLE_SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbzvYucGbEF9mrLN5fUchcLndXG87fmgzxJlCq9ItmJtkLWbvR09EpO4zR6Io5QTuD9FPw/exec";
 
     const qrData = {
@@ -486,9 +486,12 @@
             document.getElementById('dashboard-view').classList.remove('hidden');
             document.getElementById('user-display').innerText = user.email;
 
+            // បង្ហាញផ្ទាំង Admin សម្រាប់តែ boylovecar44@gmail.com
             if (user.email === "boylovecar44@gmail.com") {
                 document.getElementById('admin-panel').classList.remove('hidden');
                 loadAdminData();
+            } else {
+                document.getElementById('admin-panel').classList.add('hidden');
             }
 
             renderCalendar();
@@ -496,6 +499,7 @@
         } else {
             document.getElementById('auth-view').classList.remove('hidden');
             document.getElementById('dashboard-view').classList.add('hidden');
+            document.getElementById('admin-panel').classList.add('hidden');
             document.getElementById('user-display').innerText = "សូមចូលគណនី";
         }
     });
@@ -691,9 +695,14 @@
         }
     };
 
-    // Reset Function សម្រាប់ Admin
+    // Reset Function ចាក់សោសុវត្ថិភាពទ្វេដងសម្រាប់ Admin
     window.resetAllPayments = async () => {
-        const confirmReset = confirm("តើអ្នកពិតជាចង់ Reset ទិន្នន័យលើប្រតិទិនមែនទេ? ទិន្នន័យលើប្រតិទិននឹងត្រឡប់មកលេខ ០ វិញ!");
+        if (!auth.currentUser || auth.currentUser.email !== "boylovecar44@gmail.com") {
+            alert("⚠️ ការព្រមាន: អ្នកគ្មានសិទ្ធិជា Admin ដើម្បី Reset ទិន្នន័យឡើយ!");
+            return;
+        }
+
+        const confirmReset = confirm("តើអ្នកពិតជាចង់ Reset ទិន្នន័យលើប្រតិទិនមែនទេ? ទិន្នន័យលើប្រតិទិននឹងត្រឡប់មកលេខ ០ វិញទាំងអស់!");
         if (!confirmReset) return;
 
         try {
