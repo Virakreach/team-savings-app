@@ -4,6 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>សមាគម ដំណើរកំសាន្ត - CHHOR family</title>
+
+    <!-- PWA & Mobile App Settings -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0066ff">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="CHHOR Savings">
+    <link rel="apple-touch-icon" href="https://img.icons8.com/color/192/gold-bars.png">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -334,7 +343,7 @@
                 <h3 style="margin:0 0 10px 0; font-size: 17px;">តារាងទិន្នន័យសន្សំប្រាក់ (Google Sheet) 📊</h3>
                 <iframe 
                     id="sheet-iframe"
-                    src="https://docs.google.com/spreadsheets/d/e/2PACX-1vScooRukEEAbukF9QFOxrY3OESERf3Ki2FIckaEUBVYRBzplg2tQrOGC7pE5pdrFRLLmQ95DtpAFj3w/pubhtml?widget=true&headers=false"
+                    src="https://docs.google.com/spreadsheets/d/1GKvsqDffN1cEj9r3AFJSmrhGVRUqh789FzjGED9hQ3o/htmlembed?widget=true" 
                     style="width: 100%; height: 320px; border: 1px solid #ddd; border-radius: 12px; background: #fff;"
                     title="Google Sheet Database">
                 </iframe>
@@ -366,7 +375,7 @@
         measurementId: "G-ZM7MKHGVXN"
     };
 
-    const GOOGLE_SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbyYYlCpnHKKox3WiwObdZ9750hdmG0Dq-G7xGd4_hSdD0Vp72BWeNXVMyBkwwwPeHMAPw/exec";
+    const GOOGLE_SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycby4e7cJ5wvNPtbx2VWr_gGTiKSOK32rqKq3Cnfir0swbUHRqItgl0ZGVl-bENczrKl1UA/exec";
 
     const qrData = {
         1: "https://pay.ababank.com/oRF8/80lavgtc",
@@ -596,6 +605,7 @@
         const monthKey = `${year}-${String(month + 1).padStart(2, '0')}`;
         const totalAmount = days.length * 1000;
 
+        // ផ្ញើទៅ Google Sheet ជាមួយ monthKey សម្រាប់បង្កើត Tab ស្វ័យប្រវត្តិ
         if (GOOGLE_SHEET_WEBHOOK_URL) {
             fetch(GOOGLE_SHEET_WEBHOOK_URL, {
                 method: "POST",
@@ -605,7 +615,8 @@
                     user: auth.currentUser.email,
                     amount: totalAmount,
                     selectedDays: days,
-                    month: `ខែ${khmerMonths[month]} ឆ្នាំ${year}`
+                    month: `ខែ${khmerMonths[month]} ឆ្នាំ${year}`,
+                    monthKey: monthKey
                 })
             }).catch(err => console.error("Sheet Sync Failed:", err));
         }
